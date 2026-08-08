@@ -236,12 +236,12 @@ window.DECKS = (window.DECKS || []).concat([
 
 { id:'adjectives-4', title:'Przymiotniki — opis rzeczy i osób', level:'4', area:'słownictwo', type:'pairs',
   items:[
-    ['tall','wysoki'],['short','niski'],['thin','szczupły'],['fat','gruby'],['pretty','ładny'],
-    ['ugly','brzydki'],['nice','miły'],['funny','śmieszny'],['clever','mądry'],['silly','głupiutki'],
-    ['old','stary'],['new','nowy'],['expensive','drogi'],['cheap','tani'],['heavy','ciężki'],
-    ['light','lekki'],['beautiful','piękny'],['interesting','ciekawy'],['boring','nudny'],['delicious','pyszny'],
-    ['dangerous','niebezpieczny'],['safe','bezpieczny'],['famous','sławny'],['friendly','przyjazny'],
-    ['lazy','leniwy'],['busy','zajęty'],['noisy','hałaśliwy'],['favourite','ulubiony'],
+    ['🦒 tall','wysoki'],['🐕 short','niski'],['🌾 thin','szczupły'],['🐷 fat','gruby'],['🌸 pretty','ładny'],
+    ['👹 ugly','brzydki'],['🤗 nice','miły'],['🤣 funny','śmieszny'],['🧠 clever','mądry'],['🤪 silly','głupiutki'],
+    ['🕰️ old','stary'],['✨ new','nowy'],['💎 expensive','drogi'],['🪙 cheap','tani'],['🪨 heavy','ciężki'],
+    ['🪶 light','lekki'],['🌅 beautiful','piękny'],['🔎 interesting','ciekawy'],['😴 boring','nudny'],['😋 delicious','pyszny'],
+    ['⚠️ dangerous','niebezpieczny'],['🛡️ safe','bezpieczny'],['⭐ famous','sławny'],['🤝 friendly','przyjazny'],
+    ['🦥 lazy','leniwy'],['🏃 busy','zajęty'],['📢 noisy','hałaśliwy'],['❤️ favourite','ulubiony'],
   ]},
 
 { id:'present-simple-basics-4', title:'Present Simple — podstawy', level:'4', area:'gramatyka', type:'prompts',

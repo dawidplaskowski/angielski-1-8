@@ -268,7 +268,7 @@ window.DECKS = (window.DECKS || []).concat([
     ['put off','odkładać na później'],['break down','zepsuć się'],['go on','kontynuować'],
     ['pick up','podnosić / odbierać'],['work out','ćwiczyć / wychodzić na dobre'],
     ['fill in','wypełniać (formularz)'],['throw away','wyrzucać'],['set off','wyruszać'],['bring up','wychowywać'],
-    ['carry on','kontynuować'],['give in','ustępować'],['hang out','spędzać czas'],['make up','wymyślać'],
+    ['put away','odkładać na miejsce'],['give in','ustępować'],['hang out','spędzać czas'],['make up','wymyślać'],
     ['point out','zwracać uwagę na'],['turn up','pojawiać się'],['call off','odwoływać'],['get over','dochodzić do siebie'],
     ['look up','sprawdzać (w słowniku)'],['take up','zaczynać (hobby)'],['put up with','znosić coś'],
     ['come across','natknąć się na'],

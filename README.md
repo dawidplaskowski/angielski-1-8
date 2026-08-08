@@ -34,13 +34,30 @@ Zaznacz **„dołącz kartkę z zasadami"**, żeby wydrukowały się razem z kar
 
 Bingo pojawia się tylko przy taliach z min. 25 hasłami — inaczej pola powtarzałyby się na planszy.
 
+## Opcje wydruku
+
+Nad podglądem, obok wyboru gry:
+
+- **kartka z zasadami** — dokłada na początek stronę z instrukcją dla nauczyciela.
+- **rewersy (druk dwustronny)** — dokłada strony z rewersami w kolorze poziomu.
+  Drukuj dwustronnie, obracaniem wzdłuż dłuższej krawędzi. Bez tego przy memory
+  widać przez cienki papier, co jest na karcie.
+- **wersja do kolorowania** — zostawia z ikon sam kontur. Mniej tonera i osobna
+  aktywność plastyczna. Pojawia się tylko przy taliach, które mają obrazki.
+- **odpowiedzi na kartach** — przy kartach zadań; odznacz, żeby zrobić z talii kartkówkę.
+
+Pasek u dołu każdej karty koduje poziom (1–3 zielony, 4 niebieski, 5–6 fioletowy,
+7–8 ceglasty) — pozwala posortować rozsypane pudełko.
+
 ## Struktura plików
 
 ```
 index.html          panel filtrów + widok roboczy
-app.js              filtrowanie, 4 rendery gier, tasowanie
+app.js              filtrowanie, 4 rendery gier, ikony, tasowanie
 style.css           ekran + wymiary karty 63×88 mm
 print.css           @page A4, 9 kart na stronę, ukrycie interfejsu
+fonts/andika.css    krój Andika (SIL, OFL) wpisany jako data: URI
+data/icons.js       PLIK GENEROWANY — sprite ikon OpenMoji
 data/games.js       opisy typów talii i zasady gier
 data/decks-1-3.js   talie dla klas 1–3
 data/decks-4.js     talie dla klasy 4
@@ -48,7 +65,26 @@ data/decks-5-6.js   talie dla klas 5–6
 data/decks-7-8.js   talie dla klas 7–8
 test.html           testy w przeglądarce
 run-tests.js        te same testy w konsoli: node run-tests.js
+tools/build-icons.js  przebudowa sprite'u ikon (wymaga internetu)
+tools/build-font.js   przebudowa zawężonego kroju pisma
 ```
+
+## Obrazki na kartach
+
+Ikony pochodzą z [OpenMoji](https://openmoji.org) (CC BY-SA 4.0). W plikach z taliami
+wpisujesz zwykłe emoji — aplikacja podmienia je na ikonę wektorową, która wygląda tak samo
+na każdym komputerze i drukarce, a dzięki czarnemu konturowi przeżywa druk czarno-biały.
+
+**Po dodaniu emoji, którego wcześniej nie było w żadnej talii, przebuduj sprite:**
+
+```bash
+node tools/build-icons.js     # wymaga internetu, aktualizuje data/icons.js
+```
+
+Testy powiedzą wprost, jeśli o tym zapomnisz („brak ikon dla: …").
+
+Emoji na początku hasła (`'🍎 apple'`) staje się dużym obrazkiem nad tekstem.
+Emoji w środku zdania (`'Znak 🚭 → You ___ smoke.'`) staje się małą ikonką w linii.
 
 ## Dodawanie własnej talii
 
@@ -88,4 +124,12 @@ Uruchamiaj po każdej edycji plików z taliami.
 
 ## Publikacja na GitHub Pages
 
-Repozytorium → Settings → Pages → Source: `main` / `root`. Nie ma kroku budowania.
+Repozytorium → Settings → Pages → Source: `main` / `root`. Nie ma kroku budowania —
+`data/icons.js` i `fonts/andika.css` są w repo gotowe.
+
+## Licencje materiałów
+
+- Ikony: [OpenMoji](https://openmoji.org) — CC BY-SA 4.0.
+  „All emojis designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0."
+- Krój pisma: Andika, [SIL International](https://software.sil.org/andika/) — OFL 1.1, pełny tekst w `fonts/OFL.txt`.
+  Krój dla dzieci uczących się czytać: jednopiętrowe `a` i `g`, celowo rozróżnialne `I`, `l`, `1`.

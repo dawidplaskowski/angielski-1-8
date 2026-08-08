@@ -13,6 +13,8 @@ const state = {
   boards: 4,
   showAnswers: true,
   printRules: false,
+  printBacks: false,
+  colouring: false,
 };
 
 // ── Logika danych ────────────────────────────────────────────────────────
@@ -63,13 +65,14 @@ function currentDeck() {
   return DECKS.find((d) => d.id === state.deckId) || null;
 }
 
+// Czy w talii jest cokolwiek do narysowania — decyduje o pokazaniu trybu kolorowania.
+function deckHasIcons(deck) {
+  return wordPool(deck).some((w) => splitIcon(w).emoji !== null);
+}
+
 // ── Budowanie kart ───────────────────────────────────────────────────────
 
-// Krótkie hasło = duża czcionka. Progi dobrane pod kartę 63 mm.
-function sizeClass(text) {
-  const n = text.length;
-  return n <= 10 ? 'xl' : n <= 22 ? 'lg' : n <= 45 ? 'md' : 'sm';
-}
+const EMOJI_RE = /\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*|[0-9#*]️?⃣/gu;
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -78,24 +81,109 @@ function el(tag, className, text) {
   return node;
 }
 
+// Ikona OpenMoji ze sprite'u wstrzykniętego do dokumentu (patrz initIcons).
+// Kopiujemy zawartość symbolu zamiast używać <use>, bo <use> renderuje klon
+// w shadow DOM — arkusz stylów strony go nie dosięga, więc tryb kolorowania
+// (ukrycie warstwy koloru) nie miałby żadnego efektu na to, co widać i co się drukuje.
+function icon(emoji, className) {
+  const hex = typeof OM_MAP !== 'undefined' && OM_MAP[emoji];
+  if (!hex) return null;
+  const sym = document.getElementById('om-' + hex);
+  if (!sym) return null;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', className);
+  svg.setAttribute('viewBox', '0 0 72 72');
+  svg.setAttribute('role', 'img');
+  for (const child of sym.children) svg.appendChild(child.cloneNode(true));
+  return svg;
+}
+
+// Rozdziela hasło na ikonę wiodącą i resztę tekstu: '🍎 apple' → { emoji:'🍎', text:'apple' }.
+function splitIcon(str) {
+  const m = String(str).match(EMOJI_RE);
+  if (!m) return { emoji: null, text: String(str) };
+  const first = m[0];
+  if (!String(str).startsWith(first)) return { emoji: null, text: String(str) };
+  return { emoji: first, text: String(str).slice(first.length).trim() };
+}
+
+// Emoji w środku zdania (np. 'Znak 🚭 → You ___ smoke.') zamienia na małą ikonę w linii.
+function fillText(node, str) {
+  const s = String(str);
+  let last = 0;
+  for (const m of s.matchAll(EMOJI_RE)) {
+    const ic = icon(m[0], 'icon-inline');
+    if (!ic) continue;
+    if (m.index > last) node.appendChild(document.createTextNode(s.slice(last, m.index)));
+    node.appendChild(ic);
+    last = m.index + m[0].length;
+  }
+  node.appendChild(document.createTextNode(s.slice(last)));
+  return node;
+}
+
+// Krótkie hasło = duża czcionka. Progi dobrane pod kartę 63 mm.
+// Ikona nie zmniejsza tekstu: najdłuższe hasło z ikoną ma 20 znaków, a zmniejszanie
+// robiło asymetrię w parze (obrazkowe 'goat' drobniej niż tekstowe 'koza').
+function sizeClass(text) {
+  const n = text.length;
+  return n <= 10 ? 'xl' : n <= 22 ? 'lg' : n <= 45 ? 'md' : 'sm';
+}
+
 function card(main, corner, footer) {
   const c = el('div', 'card');
   if (corner) c.appendChild(el('div', 'corner', corner));
-  c.appendChild(el('div', 'body ' + sizeClass(main), main));
-  if (footer) c.appendChild(el('div', 'answer', footer));
+
+  const { emoji, text } = splitIcon(main);
+  const ic = emoji ? icon(emoji, 'icon-card') : null;
+  if (ic) c.appendChild(ic);
+
+  const body = el('div', 'body ' + sizeClass(text));
+  fillText(body, text);
+  c.appendChild(body);
+
+  if (footer) c.appendChild(fillText(el('div', 'answer'), footer));
   return c;
 }
 
-function grid(cards) {
-  const g = el('div', 'card-grid');
+// Kolorowy pasek u dołu karty koduje poziom — po roku pozwala posortować pudełko.
+function levelClass(deck) {
+  return 'lv' + deck.level.replace('-', '');
+}
+
+function grid(cards, deck) {
+  const g = el('div', 'card-grid ' + levelClass(deck));
   cards.forEach((c) => g.appendChild(c));
   return g;
 }
 
+// Rewersy do druku dwustronnego — bez nich przy memory prześwituje przez cienki papier.
+// Siatka musi mieć tyle samo pól co przód, żeby po obróceniu kartki nic się nie przesunęło.
+function renderBacks(deck, count) {
+  const pages = [];
+  const perPage = 9;
+  for (let p = 0; p < Math.ceil(count / perPage); p++) {
+    const tiles = [];
+    for (let i = 0; i < perPage; i++) {
+      const back = el('div', 'card card-back');
+      back.appendChild(el('div', 'back-title', deck.title));
+      back.appendChild(el('div', 'back-level', LEVEL_NAMES[deck.level]));
+      tiles.push(back);
+    }
+    pages.push(grid(tiles, deck));
+  }
+  return pages;
+}
+
 // ── Rendery gier ─────────────────────────────────────────────────────────
 
+function withBacks(deck, front, count) {
+  return state.printBacks ? [...front, ...renderBacks(deck, count)] : front;
+}
+
 function renderMemory(deck) {
-  return [grid(shuffle(deck.items.flat()).map((w) => card(w)))];
+  const words = shuffle(deck.items.flat());
+  return withBacks(deck, [grid(words.map((w) => card(w)), deck)], words.length);
 }
 
 function renderPiotrus(deck) {
@@ -103,11 +191,12 @@ function renderPiotrus(deck) {
   for (const [group, words] of Object.entries(deck.items)) {
     for (const w of words) cards.push(card(w, group));
   }
-  return [grid(shuffle(cards))];
+  return withBacks(deck, [grid(shuffle(cards), deck)], cards.length);
 }
 
 function renderQA(deck) {
-  return [grid(deck.items.map((it) => card(it.q, null, state.showAnswers ? it.a : null)))];
+  const cards = deck.items.map((it) => card(it.q, null, state.showAnswers ? it.a : null));
+  return withBacks(deck, [grid(cards, deck)], cards.length);
 }
 
 function renderBingo(deck) {
@@ -119,7 +208,14 @@ function renderBingo(deck) {
     h.appendChild(el('span', null, ' plansza ' + (n + 1)));
     board.appendChild(h);
     const g = el('div', 'bingo-grid');
-    shuffle(pool).slice(0, 25).forEach((w) => g.appendChild(el('div', 'bingo-cell ' + sizeClass(w), w)));
+    shuffle(pool).slice(0, 25).forEach((w) => {
+      const { emoji, text } = splitIcon(w);
+      const ic = emoji ? icon(emoji, 'icon-bingo') : null;
+      const cell = el('div', 'bingo-cell ' + sizeClass(text));
+      if (ic) cell.appendChild(ic);
+      fillText(cell.appendChild(el('span')), text);
+      g.appendChild(cell);
+    });
     board.appendChild(g);
     out.push(board);
   }
@@ -127,7 +223,14 @@ function renderBingo(deck) {
   const draw = el('div', 'sheet-page');
   draw.appendChild(el('h2', 'bingo-title', 'Karteczki do losowania — ' + deck.title));
   const strips = el('div', 'strips');
-  pool.forEach((w) => strips.appendChild(el('div', 'strip', w)));
+  pool.forEach((w) => {
+    const { emoji, text } = splitIcon(w);
+    const strip = el('div', 'strip');
+    const ic = emoji ? icon(emoji, 'icon-strip') : null;
+    if (ic) strip.appendChild(ic);
+    fillText(strip.appendChild(el('span')), text);
+    strips.appendChild(strip);
+  });
   draw.appendChild(strips);
   out.push(draw);
   return out;
@@ -266,7 +369,19 @@ function renderGamePicker(deck, bar) {
   }
 }
 
-function renderOptions(bar) {
+function checkbox(label, key, title) {
+  const l = el('label', 'opt check');
+  if (title) l.title = title;
+  const inp = el('input');
+  inp.type = 'checkbox';
+  inp.checked = state[key];
+  inp.onchange = (e) => { state[key] = e.target.checked; renderSheet(); };
+  l.appendChild(inp);
+  l.appendChild(el('span', null, label));
+  return l;
+}
+
+function renderOptions(bar, deck) {
   const opts = el('div', 'options');
 
   if (state.game === 'bingo') {
@@ -279,23 +394,21 @@ function renderOptions(bar) {
     opts.appendChild(l);
   }
 
-  if (state.game === 'qa') {
-    const l = el('label', 'opt check');
-    const inp = el('input');
-    inp.type = 'checkbox'; inp.checked = state.showAnswers;
-    inp.onchange = (e) => { state.showAnswers = e.target.checked; renderSheet(); };
-    l.appendChild(inp);
-    l.appendChild(el('span', null, 'odpowiedzi na kartach'));
-    opts.appendChild(l);
+  if (state.game === 'qa') opts.appendChild(checkbox('odpowiedzi na kartach', 'showAnswers'));
+
+  opts.appendChild(checkbox('kartka z zasadami', 'printRules',
+    'Dokłada na początek wydruku stronę z zasadami gry.'));
+
+  if (state.game !== 'bingo') {
+    opts.appendChild(checkbox('rewersy (druk dwustronny)', 'printBacks',
+      'Dokłada strony z rewersami. Drukuj dwustronnie, obracaniem wzdłuż dłuższej krawędzi.'));
   }
 
-  const rl = el('label', 'opt check');
-  const rinp = el('input');
-  rinp.type = 'checkbox'; rinp.checked = state.printRules;
-  rinp.onchange = (e) => { state.printRules = e.target.checked; renderSheet(); };
-  rl.appendChild(rinp);
-  rl.appendChild(el('span', null, 'dołącz kartkę z zasadami'));
-  opts.appendChild(rl);
+  // Ma sens tylko tam, gdzie są ikony — inaczej przełącznik nic nie robi.
+  if (deckHasIcons(deck)) {
+    opts.appendChild(checkbox('wersja do kolorowania', 'colouring',
+      'Ukrywa wypełnienia ikon, zostawia sam kontur. Mniej tonera, dodatkowa aktywność plastyczna.'));
+  }
 
   const btns = el('div', 'buttons');
   const sh = el('button', '', '🔀 Przetasuj');
@@ -345,6 +458,8 @@ function renderSheet() {
   out.innerHTML = '';
   const deck = currentDeck();
   if (!deck) return;
+  // klasa na <body>, bo reguła trybu kolorowania celuje w sprite, a ten leży poza arkuszem
+  document.body.classList.toggle('colouring', state.colouring);
   if (state.printRules) out.appendChild(renderRules(deck, state.game));
   RENDERERS[state.game](deck).forEach((node) => out.appendChild(node));
 }
@@ -370,7 +485,7 @@ function renderMain() {
   bar.appendChild(head);
 
   renderGamePicker(deck, bar);
-  bar.appendChild(renderOptions(bar));
+  bar.appendChild(renderOptions(bar, deck));
   bar.appendChild(renderRulesPanel(deck));
   main.appendChild(bar);
 
@@ -381,7 +496,18 @@ function renderMain() {
   renderSheet();
 }
 
+// Sprite z ikonami wstrzykujemy raz do dokumentu. Musi być w TYM SAMYM dokumencie,
+// bo <use href="plik.svg#id"> nie działa po otwarciu strony dwuklikiem (file://).
+function initIcons() {
+  if (typeof OM_SPRITE === 'undefined') return;
+  const host = el('div');
+  host.style.display = 'none';
+  host.innerHTML = OM_SPRITE;
+  document.body.insertBefore(host, document.body.firstChild);
+}
+
 function init() {
+  initIcons();
   const lvl = $('#f-level');
   LEVELS.forEach((l) => {
     const o = el('option', null, LEVEL_NAMES[l]);

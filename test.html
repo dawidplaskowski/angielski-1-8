@@ -19,6 +19,7 @@
 <div id="stats"></div>
 <ul id="out"></ul>
 
+<script src="data/icons.js"></script>
 <script src="data/games.js"></script>
 <script src="data/decks-1-3.js"></script>
 <script src="data/decks-4.js"></script>
@@ -86,6 +87,20 @@ check('nie ma powtórzonych haseł w obrębie talii', () => {
   }
 });
 
+check('żadne hasło nie występuje w dwóch różnych parach', () => {
+  // Inaczej memory ma dwa poprawne dopasowania: 'long' pasowałoby do obu kart 'short'.
+  // W obrębie JEDNEJ pary powtórzenie jest w porządku (read → read, zebra → zebra).
+  for (const d of DECKS.filter(x => x.type === 'pairs')) {
+    const seen = new Map();
+    d.items.forEach((pair, i) => {
+      new Set(pair.map(w => splitIcon(w).text)).forEach((face) => {
+        assert(!seen.has(face) , `${d.id}: "${face}" jest w parze ${seen.get(face)} i ${i}`);
+        seen.set(face, i);
+      });
+    });
+  }
+});
+
 check('karty nie są za długie na wydruk (≤90 znaków)', () => {
   for (const d of DECKS) {
     for (const w of wordPool(d)) assert(w.length <= 90, `${d.id}: "${w.slice(0,40)}…" ma ${w.length} znaków`);
@@ -139,6 +154,52 @@ check('każdy typ talii jest reprezentowany przez jakieś talie', () => {
   }
 });
 
+check('każde emoji z talii ma ikonę w sprite', () => {
+  const re = /\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*|[0-9#*]️?⃣/gu;
+  const missing = new Set();
+  for (const d of DECKS) {
+    const strings = d.type === 'prompts' ? d.items.flatMap(i => [i.q, i.a]) : wordPool(d);
+    for (const s of strings) {
+      for (const e of String(s).match(re) || []) {
+        if (!OM_MAP[e]) missing.add(e);
+      }
+    }
+  }
+  assert(!missing.size, 'brak ikon dla: ' + [...missing].join(' ') + ' — uruchom node tools/build-icons.js');
+});
+
+check('każdy kod z mapy ma symbol w sprite', () => {
+  const ids = new Set([...OM_SPRITE.matchAll(/id="om-([^"]+)"/g)].map(m => m[1]));
+  const missing = [...new Set(Object.values(OM_MAP))].filter(h => !ids.has(h));
+  assert(!missing.length, 'kody bez symbolu: ' + missing.slice(0, 5));
+});
+
+check('ikony mają warstwę konturu (tryb do kolorowania)', () => {
+  const symbols = OM_SPRITE.split('<symbol ').slice(1);
+  const noLine = symbols.filter(s => !s.includes('class="om-line'));
+  assert(!noLine.length, `${noLine.length} ikon bez warstwy konturu — tryb kolorowania byłby pusty`);
+  // sprite nie może zawierać id innych niż identyfikatory symboli, bo się zduplikują
+  const stray = OM_SPRITE.replace(/<symbol id="om-[^"]+"/g, '').match(/\sid="/g);
+  assert(!stray, `${stray && stray.length} zduplikowanych id w sprite`);
+});
+
+check('splitIcon oddziela ikonę wiodącą od tekstu', () => {
+  assert(splitIcon('🍎 apple').emoji === '🍎', 'nie wyciął ikony');
+  assert(splitIcon('🍎 apple').text === 'apple', 'zły tekst po wycięciu');
+  assert(splitIcon('apple').emoji === null, 'znalazł ikonę tam, gdzie jej nie ma');
+  // emoji w środku zdania nie jest ikoną wiodącą — trafia do tekstu jako ikona w linii
+  assert(splitIcon('Znak 🚭 → You ___ smoke.').emoji === null, 'potraktował emoji ze środka jako wiodące');
+});
+
+check('deckHasIcons zgadza się z zawartością talii', () => {
+  const withIcons = DECKS.filter(deckHasIcons);
+  const without = DECKS.filter(d => !deckHasIcons(d));
+  assert(withIcons.length >= 30, `tylko ${withIcons.length} talii z ikonami`);
+  for (const d of without) {
+    assert(!wordPool(d).some(w => splitIcon(w).emoji), `${d.id}: ma ikony, a deckHasIcons mówi że nie`);
+  }
+});
+
 check('shuffle zwraca permutację, nie mutuje wejścia', () => {
   const src = [1,2,3,4,5,6,7,8,9,10];
   const copy = src.slice();
@@ -159,9 +220,28 @@ check('sizeClass maleje wraz z długością tekstu', () => {
   const order = { xl: 4, lg: 3, md: 2, sm: 1 };
   const texts = ['cat', 'get up wcześnie', 'She ___ (go) to school every day.',
     'Zamień na bierną: They clean the office every single morning before eight.'];
-  const sizes = texts.map(sizeClass);
+  const sizes = texts.map((t) => sizeClass(t));
   for (let i = 1; i < sizes.length; i++)
     assert(order[sizes[i]] < order[sizes[i-1]], `"${texts[i]}" → ${sizes[i]} nie mniejsze niż ${sizes[i-1]}`);
+});
+
+check('ikona nie zmienia rozmiaru tekstu', () => {
+  // w memory para 'goat' ↔ 'koza' musi wyglądać symetrycznie, mimo że tylko jedna ma obrazek
+  for (const [withIcon, plain] of [['🐐 goat', 'goat'], ['🍎 apple', 'apple'], ['🚿 have a shower', 'have a shower']]) {
+    assert(sizeClass(splitIcon(withIcon).text) === sizeClass(plain),
+      `"${withIcon}" dostało inny rozmiar niż "${plain}"`);
+  }
+  assert(sizeClass.length === 1, 'sizeClass przyjmuje dodatkowy argument — ikona znów wpływa na rozmiar');
+});
+
+check('teksty na kartach z ikoną mieszczą się obok niej', () => {
+  // ikona zajmuje 32 mm z 88 mm wysokości karty; powyżej ~45 znaków tekst by nie wszedł
+  for (const d of DECKS) {
+    for (const w of wordPool(d)) {
+      const s = splitIcon(w);
+      if (s.emoji) assert(s.text.length <= 45, `${d.id}: "${s.text}" ma ${s.text.length} znaków obok ikony`);
+    }
+  }
 });
 
 check('bingo dostaje 25 unikalnych pól', () => {

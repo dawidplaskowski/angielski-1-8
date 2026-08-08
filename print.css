@@ -9,13 +9,13 @@ main { padding: 0; }
 .card-grid { grid-template-columns: repeat(3, 63mm); grid-auto-rows: 88mm; width: auto; }
 .card { break-inside: avoid; }
 
-/* Każda plansza bingo / kartka z zasadami zajmuje własną stronę. */
-.sheet-page { width: auto; border: 0; padding: 0; margin: 0; break-after: page; }
-.sheet-page:last-child { break-after: auto; }
+/* Każda plansza bingo / kartka z zasadami / arkusz rewersów zajmuje własną stronę. */
+.sheet-page, .card-grid { break-after: page; }
+#sheet > :last-child { break-after: auto; }
 .bingo-cell { height: 42mm; }
 
 .rules-page ol, .rules-page ul { break-inside: avoid; }
 .rules-note { background: #fdf7e3 !important; }
 
-/* Emoji i tła mają wyjść na papier, nie zniknąć. */
+/* Emoji, ikony i tła mają wyjść na papier, nie zniknąć. */
 * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
