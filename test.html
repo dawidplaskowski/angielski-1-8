@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Testy danych i logiki</title>
+  <style>
+    body { font: 14px/1.5 system-ui, sans-serif; padding: 24px; max-width: 800px; }
+    li { list-style: none; }
+    .pass::before { content: "✅ "; }
+    .fail::before { content: "❌ "; }
+    .fail { color: #b00; font-weight: 600; }
+    #summary { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<h1>Testy</h1>
+<div id="summary"></div>
+<ul id="out"></ul>
+
+<script src="data/decks.js"></script>
+<script src="app.js"></script>
+<script>
+const results = [];
+function check(name, fn) {
+  try { fn(); results.push([true, name]); }
+  catch (e) { results.push([false, name + ' — ' + e.message]); }
+}
+function assert(cond, msg) { if (!cond) throw new Error(msg || 'assert failed'); }
+
+check('są jakieś talie', () => assert(DECKS.length >= 15, `tylko ${DECKS.length}`));
+
+check('id są unikalne', () => {
+  const ids = DECKS.map(d => d.id);
+  const dup = ids.filter((id, i) => ids.indexOf(id) !== i);
+  assert(!dup.length, 'duplikaty: ' + dup);
+});
+
+check('każda talia ma poprawne pola', () => {
+  for (const d of DECKS) {
+    assert(d.title, `${d.id}: brak title`);
+    assert(['1-3','4','5-6','7-8'].includes(d.level), `${d.id}: zły level "${d.level}"`);
+    assert(['słownictwo','gramatyka'].includes(d.area), `${d.id}: zły area "${d.area}"`);
+    assert(['pairs','groups','prompts'].includes(d.type), `${d.id}: zły type "${d.type}"`);
+  }
+});
+
+check('items pasują do type', () => {
+  for (const d of DECKS) {
+    if (d.type === 'pairs') {
+      assert(Array.isArray(d.items), `${d.id}: items nie jest tablicą`);
+      d.items.forEach((p, i) => assert(Array.isArray(p) && p.length === 2 && p[0] && p[1],
+        `${d.id}: para ${i} nie ma dwóch stron`));
+    }
+    if (d.type === 'groups') {
+      const g = Object.entries(d.items);
+      assert(g.length >= 2, `${d.id}: mniej niż 2 grupy`);
+      g.forEach(([k, v]) => assert(Array.isArray(v) && v.length >= 3, `${d.id}: grupa "${k}" < 3 kart`));
+    }
+    if (d.type === 'prompts') {
+      d.items.forEach((it, i) => assert(it.q && it.a, `${d.id}: prompt ${i} bez q lub a`));
+    }
+  }
+});
+
+check('każda talia ma dość materiału (≥16 pozycji)', () => {
+  for (const d of DECKS) {
+    const n = d.type === 'groups' ? Object.values(d.items).flat().length : d.items.length;
+    assert(n >= 16, `${d.id}: tylko ${n}`);
+  }
+});
+
+check('każdy poziom ma co najmniej 3 talie', () => {
+  for (const lvl of ['1-3','4','5-6','7-8']) {
+    const n = DECKS.filter(d => d.level === lvl).length;
+    assert(n >= 3, `klasa ${lvl}: tylko ${n}`);
+  }
+});
+
+check('każda talia oferuje jakąś grę', () => {
+  for (const d of DECKS) assert(gamesFor(d).length >= 1, `${d.id}: brak gier`);
+});
+
+check('talie z bingo mają ≥25 haseł', () => {
+  for (const d of DECKS) {
+    if (gamesFor(d).includes('bingo')) {
+      const n = wordPool(d).length;
+      assert(n >= 25, `${d.id}: pula ${n} < 25`);
+    }
+  }
+});
+
+check('talia z <25 haseł nie oferuje bingo', () => {
+  for (const d of DECKS) {
+    if (wordPool(d).length < 25) assert(!gamesFor(d).includes('bingo'), `${d.id} oferuje bingo mimo za małej puli`);
+  }
+  // reguła musi być testowana na czymś realnym
+  const fake = { type:'pairs', items:[['a','b'],['c','d']] };
+  assert(!gamesFor(fake).includes('bingo'), 'mała talia testowa dostała bingo');
+  assert(gamesFor(fake).includes('memory'), 'mała talia straciła memory');
+});
+
+check('shuffle zwraca permutację, nie mutuje wejścia', () => {
+  const src = [1,2,3,4,5,6,7,8,9,10];
+  const copy = src.slice();
+  const out = shuffle(src);
+  assert(JSON.stringify(src) === JSON.stringify(copy), 'zmutował wejście');
+  assert(out.length === src.length, 'inna długość');
+  assert(JSON.stringify(out.slice().sort((a,b)=>a-b)) === JSON.stringify(copy), 'nie jest permutacją');
+});
+
+check('shuffle faktycznie tasuje', () => {
+  const src = Array.from({length: 20}, (_, i) => i);
+  const same = Array.from({length: 20}, () => shuffle(src))
+    .filter(o => JSON.stringify(o) === JSON.stringify(src)).length;
+  assert(same <= 1, `${same}/20 prób nie zmieniło kolejności`);
+});
+
+check('sizeClass maleje wraz z długością tekstu', () => {
+  const order = { xl: 4, lg: 3, md: 2, sm: 1 };
+  const texts = ['cat', 'get up wcześnie', 'She ___ (go) to school every day.',
+    'Zamień na bierną: They clean the office every single morning before eight.'];
+  const sizes = texts.map(sizeClass);
+  for (let i = 1; i < sizes.length; i++)
+    assert(order[sizes[i]] < order[sizes[i-1]], `"${texts[i]}" → ${sizes[i]} nie mniejsze niż ${sizes[i-1]}`);
+});
+
+check('bingo dostaje 25 unikalnych pól', () => {
+  const deck = DECKS.find(d => gamesFor(d).includes('bingo'));
+  const board = shuffle(wordPool(deck)).slice(0, 25);
+  assert(board.length === 25, `${board.length} pól`);
+  assert(new Set(board).size === 25, 'powtórzone hasła na planszy');
+});
+
+const out = document.getElementById('out');
+results.forEach(([ok, name]) => {
+  const li = document.createElement('li');
+  li.className = ok ? 'pass' : 'fail';
+  li.textContent = name;
+  out.appendChild(li);
+});
+const failed = results.filter(r => !r[0]).length;
+document.getElementById('summary').textContent =
+  failed ? `${failed} z ${results.length} testów nie przeszło` : `Wszystkie ${results.length} testy OK`;
+document.getElementById('summary').style.color = failed ? '#b00' : '#2f6f4e';
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+@page { size: A4 portrait; margin: 8mm; }
+
+.no-print, .panel { display: none !important; }
+
+body { display: block; background: #fff; }
+
+#sheet { padding: 0; }
+
+/* 3×3 = 9 kart na stronę A4. Wiersz nie może się rozjechać między strony. */
+.card-grid { grid-template-columns: repeat(3, 63mm); grid-auto-rows: 88mm; }
+.card { break-inside: avoid; }
+
+.bingo { width: auto; border: 0; padding: 0; margin: 0; break-after: page; }
+.bingo:last-child { break-after: auto; }
+.bingo-cell { height: 42mm; }
+
+/* Emoji i tła mają wyjść na papier, nie zniknąć. */
+* { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

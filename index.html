@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Angielski 1–8 · karty do druku</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="print.css" media="print">
+</head>
+<body>
+
+<aside class="panel no-print">
+  <h1>Angielski 1–8<br><small>karty i gry do druku</small></h1>
+
+  <label>Klasa
+    <select id="f-level"><option value="">wszystkie</option></select>
+  </label>
+
+  <label>Zakres
+    <select id="f-area">
+      <option value="">wszystko</option>
+      <option value="słownictwo">słownictwo</option>
+      <option value="gramatyka">gramatyka</option>
+    </select>
+  </label>
+
+  <div id="deck-list" class="deck-list"></div>
+
+  <hr>
+
+  <label>Gra
+    <select id="f-game"></select>
+  </label>
+
+  <label id="opts-bingo" hidden>Liczba plansz
+    <input id="f-boards" type="number" min="1" max="30" value="4">
+  </label>
+
+  <label id="opts-qa" class="check" hidden>
+    <input id="f-answers" type="checkbox" checked> pokaż odpowiedzi na kartach
+  </label>
+
+  <div class="buttons">
+    <button id="shuffle-btn">🔀 Przetasuj</button>
+    <button id="print-btn" class="primary" disabled>🖨️ Drukuj</button>
+  </div>
+
+  <p class="hint">Drukuj na grubszym papierze (160–250 g). Karty tnij po przerywanej linii.</p>
+</aside>
+
+<main id="sheet"></main>
+
+<script src="data/decks.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
