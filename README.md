@@ -3,25 +3,57 @@
 Statyczna strona: wybierasz talię i grę, klikasz **Drukuj**, dostajesz gotowe karty na A4.
 Bez instalacji, bez konta, bez internetu (po pobraniu folderu).
 
+**73 talie · ok. 1900 haseł** — słownictwo i gramatyka dla klas 1–3, 4, 5–6 i 7–8.
+
 **Użycie:** otwórz `index.html` w przeglądarce (albo wejdź na link GitHub Pages).
-Filtruj po klasie i zakresie → kliknij talię → wybierz grę → **Drukuj**.
+Filtruj po klasie i zakresie, albo wpisz szukane słowo → kliknij talię → wybierz grę → **Drukuj**.
+Drukuj na papierze 160–250 g, karty tnij po przerywanej linii.
 
-Drukuj na papierze 160–250 g. Karty tnij po przerywanej linii.
-Przycisk **Przetasuj** losuje układ od nowa (przy bingo — nowe plansze).
+## Trzy typy talii
 
-## Gry
+Typ talii mówi, jak zbudowane są karty — i decyduje, w co można nią zagrać.
 
-| Gra | Z czego powstaje |
-|---|---|
-| **Memory / dobieranie par** | talie z parami (przeciwieństwa, ang–pol, bezokolicznik–past simple) |
-| **Piotruś** | talie z grupami; w rogu karty jest nazwa grupy, zbiera się komplety |
-| **Karty zadań** | talie gramatyczne; odpowiedź drobnym drukiem u dołu (można ukryć) |
-| **Bingo 5×5** | każda talia słownictwa z min. 25 hasłami; N plansz + arkusz do losowania |
+| Typ | Co jest na karcie | Gry |
+|---|---|---|
+| 🔗 **Talia par** | jedno hasło, duża czcionka; karty łączą się w pary (słowo–tłumaczenie, przeciwieństwa, formy czasownika) | Memory, Bingo |
+| 🗂️ **Talia grup tematycznych** | hasło + nazwa kategorii drobnym drukiem w rogu; karty tworzą komplety po kilka sztuk | Piotruś, Bingo |
+| 📝 **Talia zadań** | polecenie (luka, poprawa błędu, tłumaczenie) + odpowiedź drobnym drukiem u dołu | Karty zadań |
+
+## Cztery gry
+
+| Gra | Co drukuje | Gracze | Czas |
+|---|---|---|---|
+| 🃏 **Memory / dobieranie par** | całą talię potasowaną, 9 kart na stronę | 2–4 osoby | 10–15 min |
+| 👨‍🌾 **Piotruś / Go Fish** | całą talię z kategoriami w rogu | 3–5 osób | 15–20 min |
+| ❓ **Karty zadań** | po jednym poleceniu na kartę | cała klasa lub pary | dowolnie |
+| 🎱 **Bingo 5×5** | wybraną liczbę różnych plansz + arkusz karteczek do losowania | cała klasa | 10–15 min |
+
+Pełne zasady każdej gry, warianty na łatwiej/trudniej i wskazówki do konkretnych talii
+są w aplikacji — w rozwijanym panelu **„Jak grać"** nad podglądem wydruku.
+Zaznacz **„dołącz kartkę z zasadami"**, żeby wydrukowały się razem z kartami jako pierwsza strona.
+
+Bingo pojawia się tylko przy taliach z min. 25 hasłami — inaczej pola powtarzałyby się na planszy.
+
+## Struktura plików
+
+```
+index.html          panel filtrów + widok roboczy
+app.js              filtrowanie, 4 rendery gier, tasowanie
+style.css           ekran + wymiary karty 63×88 mm
+print.css           @page A4, 9 kart na stronę, ukrycie interfejsu
+data/games.js       opisy typów talii i zasady gier
+data/decks-1-3.js   talie dla klas 1–3
+data/decks-4.js     talie dla klasy 4
+data/decks-5-6.js   talie dla klas 5–6
+data/decks-7-8.js   talie dla klas 7–8
+test.html           testy w przeglądarce
+run-tests.js        te same testy w konsoli: node run-tests.js
+```
 
 ## Dodawanie własnej talii
 
-Otwórz `data/decks.js` w Notatniku, skopiuj dowolną talię, zmień treść.
-Ważne: nowe `id` musi być unikalne. Trzy formaty:
+Otwórz plik `data/decks-*.js` odpowiadający poziomowi, skopiuj dowolną talię i zmień treść.
+Nowe `id` musi być unikalne. Trzy formaty:
 
 ```js
 // pary — daje memory i bingo
@@ -40,18 +72,20 @@ Ważne: nowe `id` musi być unikalne. Trzy formaty:
 
 - `level`: `'1-3'` | `'4'` | `'5-6'` | `'7-8'`
 - `area`: `'słownictwo'` | `'gramatyka'`
+- `note` (opcjonalnie): wskazówka dla nauczyciela, pokazywana w panelu „Jak grać" i na kartce z zasadami.
 - Emoji wklejasz wprost w tekst (`'🍎 apple'`) — drukują się kolorowo.
 - Bingo pojawi się automatycznie, gdy talia ma co najmniej 25 haseł.
 
-Po zmianie odśwież stronę. Jeśli talia zniknęła — otwórz `test.html`,
-pokaże na czerwono co jest nie tak (literówka, brakujący przecinek, powtórzone `id`).
+Po zmianie odśwież stronę. Jeśli coś nie działa — otwórz `test.html`,
+pokaże na czerwono, co jest nie tak (literówka, brakujący przecinek, powtórzone `id` lub hasło).
 
 ## Testy
 
-Otwórz `test.html` w przeglądarce. Sprawdza poprawność wszystkich talii
-i logikę tasowania/doboru gier. Uruchamiaj po każdej edycji `decks.js`.
+`node run-tests.js` w konsoli albo `test.html` w przeglądarce.
+Sprawdzają poprawność wszystkich talii (pola, format, duplikaty, długość tekstu na karcie),
+spójność opisów gier oraz logikę tasowania, filtrów i doboru gier.
+Uruchamiaj po każdej edycji plików z taliami.
 
 ## Publikacja na GitHub Pages
 
-Wrzuć folder do repozytorium → Settings → Pages → Source: `main` / `root`.
-Nic więcej — nie ma kroku budowania.
+Repozytorium → Settings → Pages → Source: `main` / `root`. Nie ma kroku budowania.

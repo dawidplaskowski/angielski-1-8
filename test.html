@@ -4,20 +4,26 @@
   <meta charset="utf-8">
   <title>Testy danych i logiki</title>
   <style>
-    body { font: 14px/1.5 system-ui, sans-serif; padding: 24px; max-width: 800px; }
+    body { font: 14px/1.5 system-ui, sans-serif; padding: 24px; max-width: 900px; }
     li { list-style: none; }
     .pass::before { content: "✅ "; }
     .fail::before { content: "❌ "; }
     .fail { color: #b00; font-weight: 600; }
     #summary { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    #stats { color: #555; margin-bottom: 16px; }
   </style>
 </head>
 <body>
 <h1>Testy</h1>
 <div id="summary"></div>
+<div id="stats"></div>
 <ul id="out"></ul>
 
-<script src="data/decks.js"></script>
+<script src="data/games.js"></script>
+<script src="data/decks-1-3.js"></script>
+<script src="data/decks-4.js"></script>
+<script src="data/decks-5-6.js"></script>
+<script src="data/decks-7-8.js"></script>
 <script src="app.js"></script>
 <script>
 const results = [];
@@ -27,7 +33,13 @@ function check(name, fn) {
 }
 function assert(cond, msg) { if (!cond) throw new Error(msg || 'assert failed'); }
 
-check('są jakieś talie', () => assert(DECKS.length >= 15, `tylko ${DECKS.length}`));
+check('są talie na każdym poziomie', () => {
+  assert(DECKS.length >= 60, `tylko ${DECKS.length} talii`);
+  for (const lvl of ['1-3','4','5-6','7-8']) {
+    const n = DECKS.filter(d => d.level === lvl).length;
+    assert(n >= 12, `klasa ${lvl}: tylko ${n} talii`);
+  }
+});
 
 check('id są unikalne', () => {
   const ids = DECKS.map(d => d.id);
@@ -63,16 +75,20 @@ check('items pasują do type', () => {
 });
 
 check('każda talia ma dość materiału (≥16 pozycji)', () => {
+  for (const d of DECKS) assert(countItems(d) >= 16, `${d.id}: tylko ${countItems(d)}`);
+});
+
+check('nie ma powtórzonych haseł w obrębie talii', () => {
   for (const d of DECKS) {
-    const n = d.type === 'groups' ? Object.values(d.items).flat().length : d.items.length;
-    assert(n >= 16, `${d.id}: tylko ${n}`);
+    const pool = wordPool(d);
+    const dup = pool.filter((w, i) => pool.indexOf(w) !== i);
+    assert(!dup.length, `${d.id}: powtórzone hasła: ${[...new Set(dup)].slice(0,3)}`);
   }
 });
 
-check('każdy poziom ma co najmniej 3 talie', () => {
-  for (const lvl of ['1-3','4','5-6','7-8']) {
-    const n = DECKS.filter(d => d.level === lvl).length;
-    assert(n >= 3, `klasa ${lvl}: tylko ${n}`);
+check('karty nie są za długie na wydruk (≤90 znaków)', () => {
+  for (const d of DECKS) {
+    for (const w of wordPool(d)) assert(w.length <= 90, `${d.id}: "${w.slice(0,40)}…" ma ${w.length} znaków`);
   }
 });
 
@@ -82,10 +98,7 @@ check('każda talia oferuje jakąś grę', () => {
 
 check('talie z bingo mają ≥25 haseł', () => {
   for (const d of DECKS) {
-    if (gamesFor(d).includes('bingo')) {
-      const n = wordPool(d).length;
-      assert(n >= 25, `${d.id}: pula ${n} < 25`);
-    }
+    if (gamesFor(d).includes('bingo')) assert(wordPool(d).length >= 25, `${d.id}: pula ${wordPool(d).length} < 25`);
   }
 });
 
@@ -93,10 +106,37 @@ check('talia z <25 haseł nie oferuje bingo', () => {
   for (const d of DECKS) {
     if (wordPool(d).length < 25) assert(!gamesFor(d).includes('bingo'), `${d.id} oferuje bingo mimo za małej puli`);
   }
-  // reguła musi być testowana na czymś realnym
   const fake = { type:'pairs', items:[['a','b'],['c','d']] };
   assert(!gamesFor(fake).includes('bingo'), 'mała talia testowa dostała bingo');
   assert(gamesFor(fake).includes('memory'), 'mała talia straciła memory');
+});
+
+check('każdy typ talii ma opis, każda gra ma zasady', () => {
+  for (const t of ['pairs','groups','prompts']) {
+    const d = DECK_TYPES[t];
+    assert(d && d.name && d.what && d.looks && d.icon, `DECK_TYPES.${t} niekompletny`);
+  }
+  for (const [id, g] of Object.entries(GAMES)) {
+    assert(g.name && g.short && g.prints && g.players && g.time && g.icon, `GAMES.${id}: brak pola opisowego`);
+    assert(g.rules.length >= 3, `GAMES.${id}: mniej niż 3 kroki zasad`);
+    assert(g.variants.length >= 2, `GAMES.${id}: mniej niż 2 warianty`);
+  }
+});
+
+check('każda gra zwracana przez gamesFor ma wpis w GAMES i renderer', () => {
+  const used = new Set(DECKS.flatMap(gamesFor));
+  for (const id of used) {
+    assert(GAMES[id], `gra "${id}" bez opisu w GAMES`);
+    assert(typeof RENDERERS[id] === 'function', `gra "${id}" bez renderera`);
+  }
+  for (const id of Object.keys(GAMES)) assert(used.has(id), `gra "${id}" opisana, ale nieużywana`);
+});
+
+check('każdy typ talii jest reprezentowany przez jakieś talie', () => {
+  for (const t of ['pairs','groups','prompts']) {
+    const n = DECKS.filter(d => d.type === t).length;
+    assert(n >= 5, `typ ${t}: tylko ${n} talii`);
+  }
 });
 
 check('shuffle zwraca permutację, nie mutuje wejścia', () => {
@@ -131,17 +171,36 @@ check('bingo dostaje 25 unikalnych pól', () => {
   assert(new Set(board).size === 25, 'powtórzone hasła na planszy');
 });
 
-const out = document.getElementById('out');
-results.forEach(([ok, name]) => {
-  const li = document.createElement('li');
-  li.className = ok ? 'pass' : 'fail';
-  li.textContent = name;
-  out.appendChild(li);
+check('filtry zawężają listę i szukanie działa', () => {
+  const save = { level: state.level, area: state.area, search: state.search };
+  state.level = '4'; state.area = ''; state.search = '';
+  const lvl4 = DECKS.filter(matchesFilters);
+  assert(lvl4.length && lvl4.every(d => d.level === '4'), 'filtr klasy nie działa');
+  state.level = ''; state.area = 'gramatyka';
+  assert(DECKS.filter(matchesFilters).every(d => d.area === 'gramatyka'), 'filtr zakresu nie działa');
+  state.area = ''; state.search = 'apple';
+  const found = DECKS.filter(matchesFilters);
+  assert(found.length >= 1, 'szukanie po haśle "apple" nic nie znalazło');
+  Object.assign(state, save);
 });
-const failed = results.filter(r => !r[0]).length;
-document.getElementById('summary').textContent =
-  failed ? `${failed} z ${results.length} testów nie przeszło` : `Wszystkie ${results.length} testy OK`;
-document.getElementById('summary').style.color = failed ? '#b00' : '#2f6f4e';
+
+if (typeof document !== 'undefined' && document.getElementById('out')) {
+  const out = document.getElementById('out');
+  results.forEach(([ok, name]) => {
+    const li = document.createElement('li');
+    li.className = ok ? 'pass' : 'fail';
+    li.textContent = name;
+    out.appendChild(li);
+  });
+  const failed = results.filter(r => !r[0]).length;
+  const sum = document.getElementById('summary');
+  sum.textContent = failed ? `${failed} z ${results.length} testów nie przeszło` : `Wszystkie ${results.length} testy OK`;
+  sum.style.color = failed ? '#b00' : '#2f6f4e';
+  const cards = DECKS.reduce((n, d) => n + countItems(d), 0);
+  document.getElementById('stats').textContent =
+    `${DECKS.length} talii · ${cards} haseł · ` +
+    ['1-3','4','5-6','7-8'].map(l => `kl. ${l}: ${DECKS.filter(d => d.level === l).length}`).join(' · ');
+}
 </script>
 </body>
 </html>

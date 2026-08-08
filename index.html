@@ -3,54 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Angielski 1–8 · karty do druku</title>
+  <title>Angielski 1–8 · karty i gry do druku</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="print.css" media="print">
 </head>
 <body>
 
 <aside class="panel no-print">
-  <h1>Angielski 1–8<br><small>karty i gry do druku</small></h1>
+  <button id="reset-btn" class="brand">
+    <span class="brand-mark">🃏</span>
+    <span>Angielski 1–8<small>karty i gry do druku</small></span>
+  </button>
 
-  <label>Klasa
-    <select id="f-level"><option value="">wszystkie</option></select>
-  </label>
+  <input id="f-search" type="search" placeholder="Szukaj talii lub słowa…" autocomplete="off">
 
-  <label>Zakres
-    <select id="f-area">
-      <option value="">wszystko</option>
-      <option value="słownictwo">słownictwo</option>
-      <option value="gramatyka">gramatyka</option>
-    </select>
-  </label>
-
-  <div id="deck-list" class="deck-list"></div>
-
-  <hr>
-
-  <label>Gra
-    <select id="f-game"></select>
-  </label>
-
-  <label id="opts-bingo" hidden>Liczba plansz
-    <input id="f-boards" type="number" min="1" max="30" value="4">
-  </label>
-
-  <label id="opts-qa" class="check" hidden>
-    <input id="f-answers" type="checkbox" checked> pokaż odpowiedzi na kartach
-  </label>
-
-  <div class="buttons">
-    <button id="shuffle-btn">🔀 Przetasuj</button>
-    <button id="print-btn" class="primary" disabled>🖨️ Drukuj</button>
+  <div class="filters">
+    <label>Klasa
+      <select id="f-level"><option value="">wszystkie</option></select>
+    </label>
+    <label>Zakres
+      <select id="f-area">
+        <option value="">wszystko</option>
+        <option value="słownictwo">słownictwo</option>
+        <option value="gramatyka">gramatyka</option>
+      </select>
+    </label>
   </div>
 
-  <p class="hint">Drukuj na grubszym papierze (160–250 g). Karty tnij po przerywanej linii.</p>
+  <div id="deck-count" class="deck-count"></div>
+  <div id="deck-list" class="deck-list"></div>
 </aside>
 
-<main id="sheet"></main>
+<main id="main"></main>
 
-<script src="data/decks.js"></script>
+<script src="data/games.js"></script>
+<script src="data/decks-1-3.js"></script>
+<script src="data/decks-4.js"></script>
+<script src="data/decks-5-6.js"></script>
+<script src="data/decks-7-8.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

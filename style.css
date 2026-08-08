@@ -1,9 +1,13 @@
 :root {
   --ink: #1b1b1f;
   --muted: #6b6b76;
-  --line: #d6d6de;
+  --line: #dcdce4;
   --accent: #2f6f4e;
-  --bg: #f2f2f0;
+  --accent-soft: #e8f1ec;
+  --gram: #7a4b8f;
+  --gram-soft: #f1e9f5;
+  --bg: #f4f4f2;
+  --paper: #fff;
 }
 
 * { box-sizing: border-box; }
@@ -12,18 +16,22 @@ body {
   margin: 0;
   display: flex;
   min-height: 100vh;
-  font: 15px/1.45 system-ui, "Segoe UI", sans-serif;
+  font: 15px/1.5 system-ui, "Segoe UI", sans-serif;
   color: var(--ink);
   background: var(--bg);
 }
 
-/* ── Panel ─────────────────────────────────────────────── */
+h2, h3, h4 { margin: 0; }
+ul, ol { margin: 6px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+
+/* ── Panel boczny ──────────────────────────────────────── */
 
 .panel {
-  width: 300px;
+  width: 320px;
   flex: none;
-  padding: 20px;
-  background: #fff;
+  padding: 16px;
+  background: var(--paper);
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -31,73 +39,194 @@ body {
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
 }
 
-h1 { font-size: 19px; margin: 0 0 4px; line-height: 1.25; }
-h1 small { font-weight: 400; font-size: 13px; color: var(--muted); }
-
-label { display: block; font-size: 13px; color: var(--muted); }
-label.check { display: flex; align-items: center; gap: 8px; }
-
-select, input[type="number"] {
-  width: 100%;
-  margin-top: 4px;
-  padding: 7px 8px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: none;
+  padding: 0;
   font: inherit;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
-  color: var(--ink);
-}
-label.check input { width: auto; margin: 0; }
-
-hr { border: 0; border-top: 1px solid var(--line); width: 100%; margin: 4px 0; }
-
-.deck-list { display: flex; flex-direction: column; gap: 4px; }
-
-.deck {
   text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.brand-mark { font-size: 26px; }
+.brand span span, .brand > span:last-child { font-weight: 700; font-size: 17px; line-height: 1.2; }
+.brand small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+
+input[type="search"], select, input[type="number"] {
+  width: 100%;
   padding: 8px 10px;
   font: inherit;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: none;
-  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.filters { display: flex; gap: 8px; }
+.filters label { flex: 1; font-size: 12px; color: var(--muted); }
+.filters select { margin-top: 3px; }
+
+.deck-count { font-size: 12px; color: var(--muted); }
+
+.deck-list { flex: 1; overflow-y: auto; margin: 0 -6px; padding: 0 6px; }
+
+.level-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin: 14px 0 5px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--line);
+}
+.level-head:first-child { margin-top: 0; }
+
+.deck {
   display: block;
   width: 100%;
+  text-align: left;
+  padding: 7px 9px;
+  margin-bottom: 2px;
+  font: inherit;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  color: inherit;
 }
 .deck:hover { background: #f4f4f2; }
-.deck.active { background: #e8f1ec; border-color: var(--accent); }
-.deck strong { display: block; font-weight: 600; }
-.deck .meta { font-size: 12px; color: var(--muted); }
+.deck.active { background: var(--accent-soft); border-color: var(--accent); }
+.deck-title { display: block; font-weight: 600; line-height: 1.3; }
+.deck-meta { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 3px; }
+.deck-n { font-size: 11px; color: var(--muted); }
 
-.buttons { display: flex; gap: 8px; margin-top: 4px; }
+.tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.tag-g { background: var(--gram-soft); color: var(--gram); }
+.tag-type { background: #eeeef2; color: #55555f; }
+
+/* ── Główna kolumna ────────────────────────────────────── */
+
+main { flex: 1; padding: 22px 26px; min-width: 0; }
+.empty { color: var(--muted); }
+
+/* Ekran startowy */
+.welcome { max-width: 1000px; }
+.welcome h2 { font-size: 22px; }
+.lead { color: var(--muted); margin: 6px 0 20px; max-width: 60ch; }
+
+.type-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 14px; }
+.type-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+}
+.type-icon { font-size: 28px; line-height: 1; }
+.type-card h3 { margin: 8px 0 6px; font-size: 16px; }
+.type-card p { margin: 0 0 8px; font-size: 13.5px; }
+.type-looks { color: var(--muted); }
+.type-games { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 10px; }
+.type-games-label { font-size: 11px; color: var(--muted); }
+.chip {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.type-count { margin-top: 10px; font-size: 11px; color: var(--muted); }
+
+/* Pasek roboczy nad podglądem */
+.workbench {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
+  max-width: 1000px;
+}
+.wb-head h2 { font-size: 20px; }
+.wb-sub { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 5px 0 14px; font-size: 12px; color: var(--muted); }
+
+.game-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.game-tab {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  flex: 1 1 260px;
+  padding: 10px 12px;
+  font: inherit;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  cursor: pointer;
+  color: inherit;
+}
+.game-tab:hover { border-color: var(--accent); }
+.game-tab.active { background: var(--accent-soft); border-color: var(--accent); }
+.game-icon { font-size: 22px; }
+.game-txt { display: flex; flex-direction: column; min-width: 0; }
+.game-txt strong { font-size: 14px; }
+.game-txt span { font-size: 12px; color: var(--muted); }
+
+.options { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 14px; }
+.opt { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+.opt input[type="number"] { width: 70px; }
+.opt.check input { width: auto; }
+
+.buttons { display: flex; gap: 8px; margin-left: auto; }
 button {
-  flex: 1;
-  padding: 9px;
+  padding: 9px 16px;
   font: inherit;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 8px;
+  background: var(--paper);
   cursor: pointer;
+  color: inherit;
 }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-button:disabled { opacity: .45; cursor: default; }
 
-.hint { font-size: 12px; color: var(--muted); margin: 0; }
-.empty { color: var(--muted); padding: 24px; }
+.hint { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
 
-/* ── Arkusz ────────────────────────────────────────────── */
+/* Panel „Jak grać" */
+.rules-panel { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.rules-panel summary { cursor: pointer; display: flex; gap: 10px; align-items: baseline; }
+.rules-meta { font-size: 12px; color: var(--muted); }
+.rules-body { margin-top: 10px; font-size: 13.5px; }
+.rules-prints { color: var(--muted); margin: 0 0 8px; }
+.rules-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 4px 24px; }
+.rules-cols h4 { font-size: 13px; margin-bottom: 2px; }
+.rules-note { background: #fdf7e3; border-left: 3px solid #e0c060; padding: 8px 10px; margin: 10px 0 0; border-radius: 0 6px 6px 0; }
 
-#sheet { flex: 1; padding: 20px; }
-.sheet-title { font-size: 16px; margin: 0 0 14px; color: var(--muted); font-weight: 600; }
+.sheet-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* ── Arkusz do druku ───────────────────────────────────── */
 
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 63mm);
   grid-auto-rows: 88mm;
-  gap: 0;
+  background: var(--paper);
+  width: max-content;
 }
 
 .card {
@@ -109,7 +238,6 @@ button:disabled { opacity: .45; cursor: default; }
   align-items: center;
   text-align: center;
   position: relative;
-  background: #fff;
   overflow: hidden;
   break-inside: avoid;
 }
@@ -122,9 +250,7 @@ button:disabled { opacity: .45; cursor: default; }
 
 .card .corner {
   position: absolute;
-  top: 3mm;
-  left: 3mm;
-  right: 3mm;
+  top: 3mm; left: 3mm; right: 3mm;
   font-size: 8pt;
   color: #555;
   text-transform: uppercase;
@@ -133,20 +259,17 @@ button:disabled { opacity: .45; cursor: default; }
 
 .card .answer {
   position: absolute;
-  bottom: 4mm;
-  left: 4mm;
-  right: 4mm;
+  bottom: 4mm; left: 4mm; right: 4mm;
   font-size: 9pt;
   color: #444;
   border-top: 1px solid #ddd;
   padding-top: 2mm;
 }
 
-/* ── Bingo ─────────────────────────────────────────────── */
+.sheet-page { background: var(--paper); width: 190mm; padding: 8mm; margin-bottom: 6mm; border: 1px solid var(--line); }
 
-.bingo { background: #fff; border: 1px dashed #999; padding: 8mm; margin-bottom: 6mm; width: 190mm; }
-.bingo h2 { font-size: 15pt; margin: 0 0 5mm; text-align: center; letter-spacing: .1em; }
-.bingo h2 span { font-size: 10pt; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+.bingo-title { font-size: 15pt; margin: 0 0 5mm; text-align: center; letter-spacing: .1em; }
+.bingo-title span { font-size: 10pt; font-weight: 400; color: var(--muted); letter-spacing: 0; }
 
 .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); }
 .bingo-cell {
@@ -164,10 +287,24 @@ button:disabled { opacity: .45; cursor: default; }
 .bingo-cell.md, .bingo-cell.sm { font-size: 8pt; }
 
 .strips { display: grid; grid-template-columns: repeat(4, 1fr); }
-.strip {
-  border: 1px dashed #999;
-  padding: 3mm;
-  font-size: 11pt;
-  text-align: center;
-  overflow-wrap: anywhere;
+.strip { border: 1px dashed #999; padding: 3mm; font-size: 11pt; text-align: center; overflow-wrap: anywhere; }
+
+/* Drukowana kartka z zasadami */
+.rules-page { font-size: 11pt; }
+.rules-title { font-size: 20pt; margin-bottom: 2mm; }
+.rules-deck { color: #555; margin: 0 0 5mm; font-size: 11pt; }
+.rules-facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-bottom: 6mm; }
+.fact { border: 1px solid #ccc; border-radius: 2mm; padding: 3mm; }
+.fact-k { display: block; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; color: #777; }
+.fact-v { font-weight: 600; }
+.rules-page h3 { font-size: 13pt; margin: 5mm 0 1mm; }
+.rules-foot { margin-top: 8mm; font-size: 9pt; color: #777; border-top: 1px solid #ddd; padding-top: 3mm; }
+
+/* ── Wąski ekran ───────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  body { flex-direction: column; }
+  .panel { width: auto; height: auto; position: static; border-right: 0; border-bottom: 1px solid var(--line); }
+  .deck-list { max-height: 40vh; }
+  main { padding: 16px; }
 }
