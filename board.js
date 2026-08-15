@@ -68,6 +68,8 @@ function boardField(theme, field, col=0, row=0, whole=false) {
 
 function addBoardTitle(world, theme, whole=false) {
   const title=el('div',`board-title${whole?' whole-title':''}`);
+  const [x,y]=theme.titlePosition||[120,282];
+  title.style.left=whole?(x/420*100)+'%':x+'mm'; title.style.top=whole?(y/594*100)+'%':y+'mm';
   title.style.background=`linear-gradient(135deg,${theme.accent},${theme.accent2})`;
   title.appendChild(el('strong',null,theme.title)); title.appendChild(el('span',null,theme.subtitle)); world.appendChild(title);
 }

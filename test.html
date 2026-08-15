@@ -278,8 +278,27 @@ check('większe pola plansz nie nachodzą na siebie', () => {
   for (const board of BOARD_THEMES) for (let i = 0; i < board.fields.length; i++) {
     for (let j = i + 1; j < board.fields.length; j++) {
       const a = board.fields[i], b = board.fields[j];
-      const distance = Math.hypot(a.x - b.x, a.y - b.y);
-      assert(distance >= 34, `${board.id}: pola ${a.n} i ${b.n} dzieli tylko ${distance.toFixed(1)} mm`);
+      const size = f => f.kind === 'special' ? [38,25] : f.kind === 'normal' ? [28,28] : [38,30];
+      const [aw,ah] = size(a), [bw,bh] = size(b);
+      const overlap = Math.abs(a.x-b.x) < (aw+bw)/2+2 && Math.abs(a.y-b.y) < (ah+bh)/2+2;
+      assert(!overlap, `${board.id}: większe pola ${a.n} i ${b.n} nachodzą na siebie`);
+    }
+  }
+});
+
+check('każda plansza ma indywidualną trasę', () => {
+  const signatures = BOARD_THEMES.map(board => board.fields.map(f => `${f.x},${f.y}`).join('|'));
+  assert(new Set(signatures).size === BOARD_THEMES.length, 'co najmniej dwie plansze współdzielą tę samą trasę');
+});
+
+check('tytuły plansz nie zasłaniają powiększonych pól', () => {
+  for (const board of BOARD_THEMES) {
+    assert(Array.isArray(board.titlePosition), `${board.id}: brak pozycji tytułu`);
+    const [x,y] = board.titlePosition;
+    for (const f of board.fields) {
+      const [fw,fh] = f.kind === 'special' ? [38,25] : f.kind === 'normal' ? [28,28] : [38,30];
+      const overlap = Math.abs(f.x-x) < 43+fw/2+2 && Math.abs(f.y-y) < 9+fh/2+2;
+      assert(!overlap, `${board.id}: tytuł zasłania pole ${f.n}`);
     }
   }
 });
@@ -294,11 +313,12 @@ check('pola specjalne używają ikon OpenMoji i czterech kolorów', () => {
   }
 });
 
-check('uniwersalne talie obejmują oba tematy i klasy 1–3', () => {
-  for (const theme of ['animal','space']) for (const grade of ['1','2','3']) {
-    const found = TASK_PACKS.filter(p => p.theme === theme && p.grade === grade);
-    assert(found.length === 1, `${theme}/kl.${grade}: ${found.length} talii`);
+check('każda plansza ma własne talie dla klas 1–3', () => {
+  for (const board of BOARD_THEMES) for (const grade of ['1','2','3']) {
+    const found = TASK_PACKS.filter(p => p.theme === board.id && p.grade === grade);
+    assert(found.length === 1, `${board.id}/kl.${grade}: ${found.length} talii`);
   }
+  assert(TASK_PACKS.length === BOARD_THEMES.length * 3, `oczekiwano ${BOARD_THEMES.length * 3} talii, jest ${TASK_PACKS.length}`);
 });
 
 check('każda talia planszowa ma 32 różnorodne zadania', () => {

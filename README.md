@@ -9,13 +9,14 @@ Bez instalacji, bez konta, bez internetu (po pobraniu folderu).
 Biblioteka zawiera osiem pełnokolorowych plansz dla klas 1–3: **Animal Adventure**,
 **Space Mission**, **Pirate Treasure**, **City Quest**, **Magic Academy**,
 **Dinosaur Expedition**, **Food Festival** i **Four Seasons**. Cztery arkusze A4 tworzą
-jedną planszę A2. Każda ma wariant numerowany i pusty oraz współpracuje z sześcioma
-uniwersalnymi zestawami po 32 zadania — Animal i Space dla klasy 1, 2 i 3.
+jedną planszę A2. Każda ma własną trasę, wariant numerowany i pusty oraz trzy
+tematyczne zestawy po 32 zadania — osobno dla klasy 1, 2 i 3.
 
 **Użycie:** otwórz `index.html` w przeglądarce (albo wejdź na link GitHub Pages).
 Filtruj po klasie, temacie i rodzaju materiału. Przy planszy wybierz wygląd pól, klasę,
 listę lub karty, pola specjalne oraz widoczność odpowiedzi. Konfigurator pokazuje całą
-złożoną planszę i pozwala otworzyć jej powiększenie; wydruk nadal dzieli ją na 4 × A4.
+złożoną planszę i pozwala otworzyć jej powiększenie. Osobne przyciski drukują wyłącznie
+4 arkusze planszy albo wyłącznie wybraną listę/karty; nie trzeba drukować całego pakietu.
 Przy talii wybierz grę, a potem **Drukuj**.
 Drukuj na papierze 160–250 g, karty tnij po przerywanej linii.
 
@@ -74,7 +75,7 @@ fonts/andika.css    krój Andika (SIL, OFL) wpisany jako data: URI
 data/icons.js       PLIK GENEROWANY — sprite ikon OpenMoji
 data/games.js       opisy typów talii i zasady gier
 data/boards.js      motywy, kolory i współrzędne pól plansz
-data/task-packs.js  6 zestawów zadań planszowych po 32 pozycje
+data/task-packs.js  24 zestawy zadań planszowych po 32 pozycje
 data/decks-1-3.js   talie dla klas 1–3
 data/decks-4.js     talie dla klasy 4
 data/decks-5-6.js   talie dla klas 5–6
