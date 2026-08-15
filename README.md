@@ -14,7 +14,9 @@ uniwersalnymi zestawami po 32 zadania — Animal i Space dla klasy 1, 2 i 3.
 
 **Użycie:** otwórz `index.html` w przeglądarce (albo wejdź na link GitHub Pages).
 Filtruj po klasie, temacie i rodzaju materiału. Przy planszy wybierz wygląd pól, klasę,
-listę lub karty oraz widoczność odpowiedzi. Przy talii wybierz grę, a potem **Drukuj**.
+listę lub karty, pola specjalne oraz widoczność odpowiedzi. Konfigurator pokazuje całą
+złożoną planszę i pozwala otworzyć jej powiększenie; wydruk nadal dzieli ją na 4 × A4.
+Przy talii wybierz grę, a potem **Drukuj**.
 Drukuj na papierze 160–250 g, karty tnij po przerywanej linii.
 
 ## Trzy typy talii

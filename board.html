@@ -25,14 +25,25 @@
         <label>Wygląd pól<select id="mode-select"><option value="numbered">Same numery</option><option value="blank">Puste pola</option></select></label>
         <label>Zestaw zadań<select id="pack-select"></select></label>
         <label>Format zadań<select id="format-select"><option value="list">Lista 1–32</option><option value="cards">Karty do wycięcia</option></select></label>
+        <label class="check"><input id="specials-toggle" type="checkbox" checked><span>Pola specjalne</span></label>
         <label class="check"><input id="answers-toggle" type="checkbox" checked><span>Pokazuj odpowiedzi</span></label>
       </div>
       <p class="config-note">Planszę laminujesz raz. Na kolejne lekcje drukujesz tylko inną listę albo talię zadań.</p>
     </section>
-    <div class="preview-label no-print">Podgląd wydruku</div>
+    <section class="screen-preview no-print" aria-labelledby="preview-heading">
+      <div class="preview-heading"><div><span class="eyebrow">CAŁA PLANSZA</span><h2 id="preview-heading">Podgląd po złożeniu</h2></div><span>Kliknij, aby powiększyć</span></div>
+      <button id="open-board-preview" class="whole-board-button" type="button" aria-label="Powiększ całą planszę"><span id="whole-board-preview"></span></button>
+    </section>
+    <div class="preview-label no-print">Pozostałe strony pakietu</div>
     <div id="pages"></div>
   </main>
 
+  <dialog id="board-preview-dialog" class="board-preview-dialog no-print" aria-labelledby="zoom-title">
+    <div class="zoom-header"><div><span class="eyebrow">PODGLĄD A2</span><h2 id="zoom-title">Cała plansza</h2></div><button id="close-board-preview" type="button" aria-label="Zamknij podgląd">×</button></div>
+    <div id="board-preview-zoom" class="board-preview-zoom"></div>
+  </dialog>
+
+  <script src="data/icons.js"></script>
   <script src="data/boards.js"></script>
   <script src="data/task-packs.js"></script>
   <script src="board.js"></script>

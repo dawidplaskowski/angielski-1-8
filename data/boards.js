@@ -20,11 +20,11 @@
   ];
   const specials = {
     5:{ icon:'🤝', effect:'Pomocnik przesuwa się o 1 pole.', tone:'help' },
-    10:{ icon:'⏩', effect:'Przesuń się o 2 pola do przodu.', tone:'good' },
-    15:{ icon:'🔙', effect:'Cofnij się o 1 pole.', tone:'bad' },
-    20:{ icon:'🎲', effect:'Rzuć kostką jeszcze raz.', tone:'good' },
-    25:{ icon:'👥', effect:'Wszyscy odpowiadają. Ty przesuwasz się o 1 pole.', tone:'help' },
-    30:{ icon:'⏩', effect:'Przesuń się o 2 pola do przodu.', tone:'good' },
+    10:{ icon:'⏩', effect:'Przesuń się o 2 pola do przodu.', tone:'bonus' },
+    15:{ icon:'↩️', effect:'Cofnij się o 1 pole.', tone:'penalty' },
+    20:{ icon:'🎲', effect:'Rzuć kostką jeszcze raz.', tone:'bonus' },
+    25:{ icon:'👥', effect:'Wszyscy odpowiadają. Ty przesuwasz się o 1 pole.', tone:'team' },
+    30:{ icon:'⏩', effect:'Przesuń się o 2 pola do przodu.', tone:'bonus' },
   };
   const makeFields = (positions) => positions.map(([x,y], i) => ({
     n: i + 1, x, y,

@@ -1,7 +1,10 @@
 Use case: stylized-concept
-Asset type: printable children's board-game master background, portrait A2
-Scene: an enchanted journey from a lantern-lit garden gate through a potion greenhouse, floating-book library and crystal classroom to a glowing observatory.
-Subjects: friendly owl, tiny dragon, books, potions without labels, crystals, mushrooms and keys; no humans.
-Style: premium modern children's picture-book illustration, polished digital gouache, magical but never dark.
-Composition: a broad calm winding corridor for 32 deterministic game spaces; focal objects away from A4 seams.
-Constraints: background only; no readable text, letters, numbers, labels, game path, spaces, UI, logos or watermark.
+Asset type: printable children's board-game master background, portrait A2 composition
+Primary request: Create a coherent fairy-tale European Magic Academy for children ages 7–9. It must feel intentionally art-directed and believable, like one place along one continuous journey, not an AI fantasy collage.
+Scene: begin at an old wrought-iron garden gate and flower-lined path; continue into a warm stone courtyard with a modest potion greenhouse and open library arcade; climb toward one elegant observatory tower.
+Subjects: a friendly owl, one small gentle dragon, a few potion bottles on shelves, books kept mostly on shelves or tables, telescope, ivy, lanterns and restrained magical details.
+Style: refined European children's storybook illustration, hand-painted gouache and watercolor texture, confident simplified shapes and controlled detail.
+Composition: portrait A-series ratio with a broad quiet central stone walkway for 32 deterministic HTML fields; important objects kept away from A4 seams.
+Lighting: warm late-afternoon changing into blue hour; cozy, mysterious and safe.
+Palette: muted moss green, warm limestone, dusty plum, ink blue, soft amber and restrained teal.
+Avoid: readable text, floating books, random floating objects, excessive crystals or sparkles, disconnected rooms, impossible collage architecture, glossy 3D rendering, game spaces, paths, UI, logos and watermark.
