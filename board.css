@@ -43,3 +43,98 @@
 @media screen{#pages .board-page{position:absolute;left:-200vw;top:0;visibility:hidden;pointer-events:none}}
 @media(max-width:900px){.screen-preview{margin:0 12px 22px}.preview-heading{align-items:flex-start}.preview-heading>span{max-width:100px;text-align:right}.board-preview-zoom{width:760px}.board-preview-zoom .whole-board-world{width:760px}}
 @media print{.screen-preview,.board-preview-dialog{display:none!important}.board-field{width:28mm;height:28mm}.board-field.special{width:38mm;height:25mm}.board-field.start,.board-field.finish{width:38mm;height:30mm}}
+
+/* Ilustrowana warstwa premium — wspólny renderer, osobna oprawa każdego świata. */
+.board-route{z-index:1;overflow:hidden;pointer-events:none}
+.board-route path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.board-route .route-shadow{stroke:color-mix(in srgb,var(--field-shadow) 42%,transparent);stroke-width:var(--route-shadow-width);transform:translateY(1.4px)}
+.board-route .route-outer{stroke:var(--route-outer);stroke-width:var(--route-outer-width)}
+.board-route .route-surface{stroke:var(--route-surface);stroke-width:var(--route-surface-width)}
+.board-route .route-detail{stroke:var(--route-detail);stroke-width:var(--route-detail-width)}
+.route-forest .route-detail{stroke-dasharray:.1 7}
+.route-orbit .route-shadow{stroke:#11194670}.route-orbit .route-surface{filter:drop-shadow(0 0 2px #c8f3ff)}.route-orbit .route-detail{stroke-dasharray:.1 8}
+.route-rope .route-surface{stroke-dasharray:6 1.4}.route-rope .route-detail{stroke-dasharray:1.4 5.8}
+.route-transit .route-detail{stroke-width:2.2}
+.route-arcane .route-detail{stroke-dasharray:.1 7.5}.route-arcane .route-surface{filter:drop-shadow(0 0 1.6px #f4df9d)}
+.route-expedition .route-detail{stroke-dasharray:5 4}
+.route-festival .route-detail{stroke:#fff8e8;stroke-dasharray:1.2 4.5}
+.route-seasons .route-surface{stroke:url(#season-route-gradient)}.route-seasons .route-detail{stroke-dasharray:.1 8}
+.route-motif{fill:var(--route-detail);stroke:var(--route-detail);stroke-width:.8;opacity:.86}
+.route-motif path,.route-motif line{fill:none;stroke:var(--route-detail);stroke-width:.9;stroke-linecap:round}
+.route-motif.motif-knot circle,.route-motif.motif-station rect{fill:var(--route-surface);stroke:var(--route-detail);stroke-width:1.2}
+.route-motif.motif-station circle{fill:var(--route-detail)}
+.route-motif.motif-seasons{fill:var(--route-detail);stroke:var(--route-detail)}
+
+.board-field{z-index:3;width:28mm;height:28mm;border:.8mm solid var(--field-rim);background:var(--field-fill);background:color-mix(in srgb,var(--field-fill) 91%,transparent);box-shadow:0 .75mm 0 color-mix(in srgb,var(--field-shadow) 46%,transparent),0 1.5mm 4mm #1e251f30;color:var(--field-ink);font-variant-numeric:tabular-nums;isolation:isolate}
+.board-field::after{content:'';position:absolute;inset:1.1mm;border:.28mm solid #ffffffb8;border-radius:inherit;pointer-events:none}
+.board-field .field-number{position:relative;z-index:1;font-size:15pt;font-weight:800;line-height:1;text-shadow:0 .35mm 0 #fff9}
+.board-field.milestone{border-color:var(--field-milestone);box-shadow:0 0 0 1.2mm color-mix(in srgb,var(--field-milestone) 72%,white),0 .85mm 0 color-mix(in srgb,var(--field-shadow) 48%,transparent),0 1.8mm 4mm #1e251f30}
+.board-field.milestone::before{content:'';position:absolute;inset:-1.15mm;border:.35mm dashed #fff9;border-radius:inherit}
+
+.board-field.special{--action:#2d7b59;width:38mm;height:25mm;grid-template-columns:14mm 1fr;gap:1mm;padding:2mm 2.5mm;border:.8mm solid color-mix(in srgb,var(--action) 72%,white);border-radius:7mm;background:color-mix(in srgb,var(--field-fill) 68%,var(--action) 32%);box-shadow:0 .8mm 0 color-mix(in srgb,var(--action) 58%,var(--field-shadow)),0 1.6mm 4mm #1e251f30;color:color-mix(in srgb,var(--action) 82%,#17231d)}
+.board-field.help{--action:#26815c}.board-field.bonus{--action:#c68818}.board-field.penalty{--action:#c75343}.board-field.team{--action:#397caf}
+.field-icon-badge{position:relative;z-index:1;width:11mm;height:11mm;display:grid;place-items:center;border:.45mm solid #ffffffc9;border-radius:50%;background:#fffdf3d9;box-shadow:inset 0 -.5mm 0 #0000000d}
+.field-icon-badge .field-icon{width:8.4mm;height:8.4mm}
+.board-field.special .field-number{font-size:15pt;text-align:center}
+
+.board-field.start,.board-field.finish{width:38mm;height:30mm;display:grid;grid-template-columns:12mm 1fr;align-items:center;gap:1.2mm;padding:2.1mm 2.6mm;border:.9mm solid var(--field-rim);border-radius:6mm;background:linear-gradient(145deg,var(--field-fill),color-mix(in srgb,var(--accent2) 38%,var(--field-fill)));box-shadow:0 1mm 0 color-mix(in srgb,var(--field-shadow) 55%,transparent),0 2mm 5mm #1e251f38;color:var(--field-ink);text-align:left}
+.board-field.finish{border-color:var(--field-milestone);background:linear-gradient(145deg,var(--field-fill),color-mix(in srgb,var(--field-milestone) 48%,var(--field-fill)));box-shadow:0 0 0 1.1mm color-mix(in srgb,var(--field-milestone) 64%,white),0 1mm 0 color-mix(in srgb,var(--field-shadow) 55%,transparent),0 2mm 5mm #1e251f38}
+.board-field.start .field-icon-badge,.board-field.finish .field-icon-badge{width:10.5mm;height:10.5mm}
+.endpoint-copy{position:relative;z-index:1;display:flex;min-width:0;flex-direction:column;gap:.5mm}
+.endpoint-copy small{font-size:5.3pt;font-weight:800;letter-spacing:.16em;line-height:1;opacity:.66}
+.field-label{max-width:20mm;font-size:7pt;font-weight:800;line-height:1.08;text-wrap:balance}
+.board-blank .board-field.normal .field-number,.board-blank .board-field.special .field-number{display:none}
+.board-blank .board-field.special{grid-template-columns:1fr;justify-items:center}
+
+/* Każdy motyw zachowuje czytelność pól, ale ma własny detal materiału. */
+[data-theme="space"] .board-field.normal{box-shadow:0 0 0 .8mm #d8f3ffb8,0 .8mm 0 #20245d80,0 1.5mm 4mm #1015384a}
+[data-theme="pirate"] .board-field.normal{border-style:double;border-width:1.4mm}
+[data-theme="city"] .board-field.normal{border-radius:38%}
+[data-theme="magic"] .board-field.normal{border-radius:46% 54% 48% 52%}
+[data-theme="dinosaur"] .board-field.normal{border-style:dashed}
+[data-theme="food"] .board-field.normal{box-shadow:0 0 0 .65mm #fff5d8,0 .8mm 0 #74382e70,0 1.5mm 4mm #3e221f35}
+[data-theme="seasons"] .board-field.normal{border-color:color-mix(in srgb,var(--field-rim) 76%,var(--field-milestone))}
+
+/* Kartusze są częścią świata gry, nie pastylką interfejsu. */
+.board-title{position:absolute;z-index:4;transform:translate(-50%,-50%);display:grid;grid-template-columns:4mm 15mm minmax(0,1fr) 4mm;align-items:center;gap:2mm;padding:2.6mm 5mm;border:1mm solid var(--title-edge);border-radius:4mm;background:linear-gradient(135deg,var(--title-bg),var(--title-bg2));box-shadow:0 1.2mm 0 color-mix(in srgb,var(--field-shadow) 62%,transparent),0 2.2mm 6mm #1b231e3d;color:var(--title-ink);text-align:left}
+.board-title::before{content:'';position:absolute;inset:1.2mm;border:.3mm solid color-mix(in srgb,var(--title-edge) 68%,transparent);border-radius:inherit;pointer-events:none}
+.title-icon-wrap{position:relative;z-index:1;width:14mm;height:14mm;display:grid;place-items:center;border:.45mm solid #ffffffa8;border-radius:50%;background:#fff8e6e8;box-shadow:inset 0 -.6mm 0 #0001}
+.title-icon{width:11mm;height:11mm}.title-copy{position:relative;z-index:1;display:flex;min-width:0;flex-direction:column;justify-content:center;gap:.7mm}
+.board-title strong{overflow-wrap:normal;font-size:14.5pt;font-weight:800;letter-spacing:.01em;line-height:.98;white-space:nowrap;text-shadow:0 .5mm 0 #0003}
+.board-title .title-subtitle{font-size:6.2pt;font-weight:700;letter-spacing:.11em;line-height:1;text-transform:uppercase;white-space:nowrap;opacity:.9}
+.title-ornament{position:relative;z-index:1;height:.5mm;border-radius:99px;background:var(--title-edge);opacity:.88}
+.title-ornament::after{content:'';position:absolute;top:50%;width:1.8mm;height:1.8mm;transform:translateY(-50%) rotate(45deg);border:.3mm solid var(--title-edge);background:var(--title-bg)}
+.ornament-left::after{right:-.3mm}.ornament-right::after{left:-.3mm}
+.title-wood{border-radius:2.5mm;background:linear-gradient(105deg,#285e46 0 49%,#755037 51% 100%)}
+.title-wood::after{content:'';position:absolute;inset:3mm 20mm;border-top:.35mm solid #f5d99973;border-bottom:.35mm solid #f5d99973}
+.title-mission{border-radius:999px;box-shadow:0 0 0 .8mm #2832747d,0 0 5mm #a6ebff69,0 1.2mm 0 #10163f99}
+.title-mission .title-icon-wrap{border-color:#bcecff;background:#e9fbff}
+.title-map{border-radius:45% 7mm 42% 6mm;background:linear-gradient(110deg,var(--title-bg),#1c7070 55%,var(--title-bg2))}
+.title-street{border-radius:2mm;border-width:.75mm;outline:.65mm solid #183f438c;outline-offset:1mm;box-shadow:0 1.2mm 0 #253c3d99,0 2.2mm 5mm #1b231e35}
+.title-crest{border-radius:3mm 3mm 8mm 8mm;border-color:#e7c66a;background:linear-gradient(120deg,#352058,#62417e 54%,#3c245d)}
+.title-crest::before{inset:1.3mm;border-style:double;border-width:.8mm}
+.title-notebook{border-radius:1.5mm;border-color:#ead59a;background:linear-gradient(90deg,#385a31 0 7%,#4c6e3d 7% 70%,#8a5c36)}
+.title-notebook strong{font-size:12.8pt}.title-notebook::after{content:'';position:absolute;left:8mm;top:2mm;bottom:2mm;border-left:.35mm dashed #f3dfaa99}
+.title-stall{border-radius:2mm 2mm 7mm 7mm;background:linear-gradient(110deg,#9f4037 0 51%,#39754f 52%)}
+.title-stall::after{content:'';position:absolute;left:2mm;right:2mm;top:1.3mm;height:2.2mm;border-radius:1mm;background:repeating-linear-gradient(90deg,#fff7db 0 6mm,#efb64e 6mm 12mm);opacity:.88}
+.title-seasons{border-radius:999px;background:linear-gradient(90deg,#5a87a5 0 25%,#61a66d 25% 50%,#e1ab45 50% 75%,#b86449 75%)}
+
+/* Skalowanie tej samej warstwy w pełnym podglądzie A2. */
+.whole-board-world .board-field{border-width:clamp(1px,.18vw,2px);box-shadow:0 .45% 0 color-mix(in srgb,var(--field-shadow) 46%,transparent),0 .8% 1.5% #1d241d2c}
+.whole-board-world .board-field::after{inset:4%;border-width:clamp(.5px,.07vw,1px)}
+.whole-board-world .board-field.milestone{box-shadow:0 0 0 clamp(1px,.28vw,3px) color-mix(in srgb,var(--field-milestone) 70%,white),0 .5% 0 #28322966,0 1% 2% #1d241d33}
+.whole-board-world .board-field.special{height:auto;padding:.4% .55%;gap:.2%;border-width:clamp(1px,.18vw,2px);border-radius:28%;grid-template-columns:38% 1fr}
+.whole-board-world .field-icon-badge{width:76%;height:auto;aspect-ratio:1;border-width:clamp(.5px,.08vw,1px)}
+.whole-board-world .field-icon-badge .field-icon{width:78%;height:78%}
+.whole-board-world .board-field.start,.whole-board-world .board-field.finish{grid-template-columns:34% 1fr;gap:2%;padding:.45% .6%;border-radius:20%}
+.whole-board-world .board-field.start .field-icon-badge,.whole-board-world .board-field.finish .field-icon-badge{width:100%;height:auto}
+.whole-board-world .endpoint-copy{gap:2%}.whole-board-world .endpoint-copy small{font-size:clamp(3px,.48vw,5px)}
+.whole-board-world .field-label{font-size:clamp(4px,.64vw,6px)}
+.whole-board-world .board-title.whole-title{transform:translate(-50%,-50%);grid-template-columns:4% 15% minmax(0,1fr) 4%;gap:2%;padding:.65% 1.2%;border-width:clamp(1px,.2vw,2px)}
+.whole-board-world .board-title::before{inset:5%;border-width:clamp(.5px,.06vw,1px)}
+.whole-board-world .title-icon-wrap{width:100%;height:auto;aspect-ratio:1;border-width:clamp(.5px,.08vw,1px)}
+.whole-board-world .title-icon{width:78%;height:78%}
+.whole-board-world .board-title strong{font-size:clamp(7px,1.45vw,14px)}
+.whole-board-world .title-notebook strong{font-size:clamp(6px,1.25vw,12px)}
+.whole-board-world .board-title .title-subtitle{font-size:clamp(3px,.58vw,6px)}
+.whole-board-world .title-ornament{height:clamp(1px,.08vw,2px)}

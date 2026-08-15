@@ -36,49 +36,144 @@ function boardIcon(emoji, cls='field-icon') {
   return svg;
 }
 
+function setBoardTheme(world, theme) {
+  const route=theme.routeStyle||{}, fields=theme.fieldStyle||{}, title=theme.titleStyle||{};
+  const routeWidth=route.width||10.5;
+  const values={
+    '--accent':theme.accent, '--accent2':theme.accent2,
+    '--route-outer':route.outer, '--route-surface':route.surface, '--route-detail':route.detail,
+    '--route-shadow-width':`${routeWidth+5}`, '--route-outer-width':`${routeWidth+2}`,
+    '--route-surface-width':`${routeWidth}`, '--route-detail-width':`${Math.max(1.2,routeWidth*.15)}`,
+    '--field-fill':fields.fill, '--field-rim':fields.rim, '--field-ink':fields.ink,
+    '--field-shadow':fields.shadow, '--field-milestone':fields.milestone,
+    '--title-bg':title.background, '--title-bg2':title.background2,
+    '--title-edge':title.edge, '--title-ink':title.ink,
+  };
+  Object.entries(values).forEach(([name,value])=>{if(value)world.style.setProperty(name,value);});
+  world.dataset.theme=theme.id;
+}
+
+function smoothRoute(points, tension=.14) {
+  if(points.length<2)return '';
+  const fixed=(n)=>Number(n.toFixed(2));
+  let d=`M ${fixed(points[0][0])} ${fixed(points[0][1])}`;
+  for(let i=0;i<points.length-1;i++){
+    const p0=points[Math.max(0,i-1)], p1=points[i], p2=points[i+1], p3=points[Math.min(points.length-1,i+2)];
+    const c1=[p1[0]+(p2[0]-p0[0])*tension,p1[1]+(p2[1]-p0[1])*tension];
+    const c2=[p2[0]-(p3[0]-p1[0])*tension,p2[1]-(p3[1]-p1[1])*tension];
+    d+=` C ${fixed(c1[0])} ${fixed(c1[1])}, ${fixed(c2[0])} ${fixed(c2[1])}, ${fixed(p2[0])} ${fixed(p2[1])}`;
+  }
+  return d;
+}
+
+function svgElement(name, attrs={}) {
+  const node=document.createElementNS('http://www.w3.org/2000/svg',name);
+  Object.entries(attrs).forEach(([key,value])=>node.setAttribute(key,String(value)));
+  return node;
+}
+
+function starPoints(radius=4, inner=1.8, count=5) {
+  return Array.from({length:count*2},(_,i)=>{
+    const angle=-Math.PI/2+i*Math.PI/count, r=i%2?inner:radius;
+    return `${(Math.cos(angle)*r).toFixed(2)},${(Math.sin(angle)*r).toFixed(2)}`;
+  }).join(' ');
+}
+
+function addRouteMotif(host, kind, x, y, rotation, index) {
+  const group=svgElement('g',{class:`route-motif motif-${kind}`,transform:`translate(${x} ${y}) rotate(${rotation})`});
+  if(kind==='paw'){
+    group.appendChild(svgElement('ellipse',{cx:0,cy:1.1,rx:2.8,ry:2.2}));
+    [-2.4,0,2.4].forEach((cx,i)=>group.appendChild(svgElement('circle',{cx,cy:-2.2-(i===1?.5:0),r:1.05})));
+  }else if(kind==='star'){
+    group.appendChild(svgElement('polygon',{points:starPoints(4.3,1.8,5)}));
+  }else if(kind==='knot'){
+    group.appendChild(svgElement('circle',{cx:0,cy:0,r:3.1}));
+    group.appendChild(svgElement('path',{d:'M -4 -3 L 4 3 M -4 3 L 4 -3'}));
+  }else if(kind==='station'){
+    group.appendChild(svgElement('rect',{x:-3.1,y:-3.1,width:6.2,height:6.2,rx:1}));
+    group.appendChild(svgElement('circle',{cx:0,cy:0,r:1.3}));
+  }else if(kind==='spark'){
+    group.appendChild(svgElement('polygon',{points:'0,-5 1.2,-1.2 5,0 1.2,1.2 0,5 -1.2,1.2 -5,0 -1.2,-1.2'}));
+  }else if(kind==='footprint'){
+    group.appendChild(svgElement('ellipse',{cx:0,cy:1.4,rx:2.5,ry:3.4}));
+    [-2.5,0,2.5].forEach((cx,i)=>group.appendChild(svgElement('circle',{cx,cy:-2.6-(i===1?.8:0),r:1.1})));
+  }else if(kind==='stitch'){
+    [-3,0,3].forEach((cx)=>group.appendChild(svgElement('line',{x1:cx-1.2,y1:-2.5,x2:cx+1.2,y2:2.5})));
+  }else if(kind==='seasons'){
+    const season=index%4;
+    if(season===0){
+      group.appendChild(svgElement('path',{d:'M -4 0 H 4 M 0 -4 V 4 M -3 -3 L 3 3 M -3 3 L 3 -3'}));
+    }else if(season===1){
+      for(let a=0;a<360;a+=90)group.appendChild(svgElement('ellipse',{cx:0,cy:-2.6,rx:1.5,ry:2.4,transform:`rotate(${a})`}));
+      group.appendChild(svgElement('circle',{cx:0,cy:0,r:1.3}));
+    }else if(season===2){
+      group.appendChild(svgElement('circle',{cx:0,cy:0,r:2.1}));
+      for(let a=0;a<360;a+=45)group.appendChild(svgElement('line',{x1:0,y1:-3.2,x2:0,y2:-5,transform:`rotate(${a})`}));
+    }else{
+      group.appendChild(svgElement('path',{d:'M -3 3 C -5 -2,-1 -5,4 -4 C 4 1,1 4,-3 3 Z M -2 2 L 3 -3'}));
+    }
+  }
+  host.appendChild(group);
+}
+
 function routeSvg(theme, col=0, row=0, whole=false) {
-  const ns='http://www.w3.org/2000/svg', svg=document.createElementNS(ns,'svg');
-  svg.setAttribute('class','board-route'); svg.setAttribute('viewBox',whole?'0 0 420 594':'0 0 210 297');
-  const points=theme.fields.map((f)=>whole?`${f.x},${f.y}`:`${f.x-col*210},${f.y-row*297}`).join(' ');
-  ['route-shadow','route-line'].forEach((cls)=>{
-    const line=document.createElementNS(ns,'polyline'); line.setAttribute('class',cls);
-    line.setAttribute('points',points); svg.appendChild(line);
+  const route=theme.routeStyle||{}, material=route.material||'classic';
+  const svg=svgElement('svg',{class:`board-route route-${material}`,viewBox:whole?'0 0 420 594':'0 0 210 297','aria-hidden':'true'});
+  if(material==='seasons'){
+    const defs=svgElement('defs'), gradient=svgElement('linearGradient',{id:'season-route-gradient',x1:0,y1:1,x2:0,y2:0});
+    [['0%','#dcecff'],['32%','#bfe6c0'],['62%','#f7d167'],['100%','#db8152']].forEach(([offset,color])=>gradient.appendChild(svgElement('stop',{offset,'stop-color':color})));
+    defs.appendChild(gradient); svg.appendChild(defs);
+  }
+  const points=theme.fields.map((f)=>[f.x-col*210,f.y-row*297]), d=smoothRoute(points,route.tension||.14);
+  ['route-shadow','route-outer','route-surface','route-detail'].forEach((cls)=>svg.appendChild(svgElement('path',{class:cls,d})));
+  const motifs=svgElement('g',{class:'route-motifs'}), marks=[3,11,19,27];
+  marks.forEach((fieldIndex,index)=>{
+    const a=theme.fields[fieldIndex], b=theme.fields[fieldIndex+1];
+    const x=(a.x+b.x)/2-col*210, y=(a.y+b.y)/2-row*297;
+    const angle=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
+    addRouteMotif(motifs,route.motif||'star',x,y,angle,index);
   });
+  svg.appendChild(motifs);
   return svg;
 }
 
 function boardField(theme, field, col=0, row=0, whole=false) {
   const activeSpecial=field.kind==='special' && state.specials;
   const kind=field.kind==='special' && !state.specials ? 'normal' : field.kind;
-  const cell=el('div',`board-field ${kind} ${activeSpecial ? field.tone || '' : ''}`); cell.dataset.field=String(field.n);
+  const milestone=field.n%8===0?' milestone':'';
+  const cell=el('div',`board-field ${kind}${milestone} ${activeSpecial ? field.tone || '' : ''}`); cell.dataset.field=String(field.n);
   if (whole) {
     cell.style.left=(field.x/420*100)+'%'; cell.style.top=(field.y/594*100)+'%';
   } else {
     cell.style.left=(field.x-col*210)+'mm'; cell.style.top=(field.y-row*297)+'mm';
   }
   if (kind==='start' || kind==='finish') {
-    const icon=boardIcon(kind==='start'?'🏁':'🏆'); if(icon) cell.appendChild(icon);
-    cell.appendChild(el('span','field-label',kind==='start'?theme.startLabel:theme.finishLabel));
+    const badge=el('span','field-icon-badge'), icon=boardIcon(kind==='start'?'🏁':'🏆'); if(icon)badge.appendChild(icon);
+    cell.appendChild(badge); const copy=el('span','endpoint-copy'); copy.appendChild(el('small',null,kind==='start'?'START':'META'));
+    copy.appendChild(el('span','field-label',kind==='start'?theme.startLabel:theme.finishLabel)); cell.appendChild(copy);
   } else if (activeSpecial) {
-    const icon=boardIcon(field.icon); if(icon) cell.appendChild(icon);
+    const badge=el('span','field-icon-badge'), icon=boardIcon(field.icon); if(icon)badge.appendChild(icon); cell.appendChild(badge);
     cell.appendChild(el('span','field-number',String(field.n)));
   } else cell.appendChild(el('span','field-number',String(field.n)));
   return cell;
 }
 
 function addBoardTitle(world, theme, whole=false) {
-  const title=el('div',`board-title${whole?' whole-title':''}`);
-  const [x,y]=theme.titlePosition||[120,282];
+  const style=theme.titleStyle||{}, title=el('div',`board-title title-${style.variant||'classic'}${whole?' whole-title':''}`);
+  const x=style.x||120, y=style.y||282, width=style.width||104, height=style.height||27;
   title.style.left=whole?(x/420*100)+'%':x+'mm'; title.style.top=whole?(y/594*100)+'%':y+'mm';
-  title.style.background=`linear-gradient(135deg,${theme.accent},${theme.accent2})`;
-  title.appendChild(el('strong',null,theme.title)); title.appendChild(el('span',null,theme.subtitle)); world.appendChild(title);
+  title.style.width=whole?(width/420*100)+'%':width+'mm'; title.style.minHeight=whole?(height/594*100)+'%':height+'mm';
+  const ornamentLeft=el('span','title-ornament ornament-left'), ornamentRight=el('span','title-ornament ornament-right');
+  title.appendChild(ornamentLeft); const iconWrap=el('span','title-icon-wrap'), icon=boardIcon(style.icon||'⭐','title-icon');
+  if(icon)iconWrap.appendChild(icon); title.appendChild(iconWrap);
+  const copy=el('span','title-copy'); copy.appendChild(el('strong',null,theme.title)); copy.appendChild(el('span','title-subtitle',theme.subtitle)); title.appendChild(copy);
+  title.appendChild(ornamentRight); world.appendChild(title);
 }
 
 function boardPage(theme, code, col, row) {
   const page=el('section',`print-page board-page board-${state.mode}`); page.dataset.code=code;
   const world=el('div','board-world');
-  world.style.setProperty('--art',`url('${theme.art}')`); world.style.setProperty('--accent',theme.accent);
-  world.style.setProperty('--accent2',theme.accent2); world.style.backgroundSize=theme.backgroundSize;
+  world.style.setProperty('--art',`url('${theme.art}')`); setBoardTheme(world,theme); world.style.backgroundSize=theme.backgroundSize;
   world.style.backgroundPositionX=col?'-210mm':'0'; world.style.backgroundPositionY=-(theme.cropY+row*297)+'mm';
   world.appendChild(routeSvg(theme,col,row));
   theme.fields.filter((f)=>Math.floor(f.x/210)===col&&Math.floor(f.y/297)===row)
@@ -90,8 +185,7 @@ function boardPage(theme, code, col, row) {
 
 function wholeBoard(theme) {
   const world=el('div',`whole-board-world board-${state.mode}`);
-  world.style.setProperty('--art',`url('${theme.preview}')`); world.style.setProperty('--accent',theme.accent);
-  world.style.setProperty('--accent2',theme.accent2); world.appendChild(routeSvg(theme,0,0,true));
+  world.style.setProperty('--art',`url('${theme.preview}')`); setBoardTheme(world,theme); world.appendChild(routeSvg(theme,0,0,true));
   theme.fields.forEach((f)=>world.appendChild(boardField(theme,f,0,0,true))); addBoardTitle(world,theme,true); return world;
 }
 

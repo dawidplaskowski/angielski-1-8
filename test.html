@@ -291,15 +291,36 @@ check('każda plansza ma indywidualną trasę', () => {
   assert(new Set(signatures).size === BOARD_THEMES.length, 'co najmniej dwie plansze współdzielą tę samą trasę');
 });
 
-check('tytuły plansz nie zasłaniają powiększonych pól', () => {
+check('kartusze plansz są kompletne, mieszczą się na arkuszu A i nie zasłaniają pól', () => {
   for (const board of BOARD_THEMES) {
-    assert(Array.isArray(board.titlePosition), `${board.id}: brak pozycji tytułu`);
-    const [x,y] = board.titlePosition;
+    const title = board.titleStyle;
+    assert(title && title.x && title.y && title.width && title.height, `${board.id}: brak konfiguracji kartusza`);
+    assert(title.variant && title.icon && title.background && title.background2 && title.edge && title.ink, `${board.id}: niepełna oprawa kartusza`);
+    assert(OM_MAP[title.icon], `${board.id}: brak ikony OpenMoji dla kartusza`);
+    const {x,y,width,height} = title;
+    assert(x-width/2 >= 0 && x+width/2 <= 210, `${board.id}: kartusz wychodzi poza arkusz A w poziomie`);
+    assert(y-height/2 >= 0 && y+height/2 <= 297, `${board.id}: kartusz wychodzi poza arkusz A w pionie`);
     for (const f of board.fields) {
       const [fw,fh] = f.kind === 'special' ? [38,25] : f.kind === 'normal' ? [28,28] : [38,30];
-      const overlap = Math.abs(f.x-x) < 43+fw/2+2 && Math.abs(f.y-y) < 9+fh/2+2;
+      const overlap = Math.abs(f.x-x) < width/2+fw/2+2 && Math.abs(f.y-y) < height/2+fh/2+2;
       assert(!overlap, `${board.id}: tytuł zasłania pole ${f.n}`);
     }
+  }
+});
+
+check('każda plansza ma kompletną i indywidualną oprawę premium', () => {
+  const materials = new Set(), variants = new Set(), signatures = new Set();
+  for (const board of BOARD_THEMES) {
+    const route = board.routeStyle, field = board.fieldStyle;
+    assert(route && route.material && route.outer && route.surface && route.detail && route.motif, `${board.id}: niepełny styl trasy`);
+    assert(route.width >= 10 && route.width <= 12, `${board.id}: nieczytelna szerokość trasy`);
+    assert(route.tension >= .1 && route.tension <= .18, `${board.id}: niebezpieczne wygładzenie trasy`);
+    assert(field && field.fill && field.rim && field.ink && field.shadow && field.milestone, `${board.id}: niepełny styl pól`);
+    assert(!materials.has(route.material), `${board.id}: powtórzony materiał trasy ${route.material}`);
+    assert(!variants.has(board.titleStyle.variant), `${board.id}: powtórzony wariant kartusza ${board.titleStyle.variant}`);
+    materials.add(route.material); variants.add(board.titleStyle.variant);
+    const signature = [route.outer,route.surface,route.detail,field.fill,field.rim,field.milestone].join('|');
+    assert(!signatures.has(signature), `${board.id}: oprawa jest kopią innego motywu`); signatures.add(signature);
   }
 });
 
