@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: printable children's board-game master background, portrait A2
+Scene: a friendly European city journey from a park through colorful streets, a market square, river bridge and tram district to a panoramic clock tower.
+Subjects: buses, tram, bicycles, fountain, shops with blank awnings, trees and skyline; no humans or readable signs.
+Style: premium modern children's picture-book illustration, polished digital gouache.
+Composition: a broad calm winding corridor for 32 deterministic game spaces; focal objects away from A4 seams.
+Constraints: background only; no text, letters, numbers, labels, game path, spaces, UI, logos or watermark.

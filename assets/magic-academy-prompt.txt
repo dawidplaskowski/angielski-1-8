@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: printable children's board-game master background, portrait A2
+Scene: an enchanted journey from a lantern-lit garden gate through a potion greenhouse, floating-book library and crystal classroom to a glowing observatory.
+Subjects: friendly owl, tiny dragon, books, potions without labels, crystals, mushrooms and keys; no humans.
+Style: premium modern children's picture-book illustration, polished digital gouache, magical but never dark.
+Composition: a broad calm winding corridor for 32 deterministic game spaces; focal objects away from A4 seams.
+Constraints: background only; no readable text, letters, numbers, labels, game path, spaces, UI, logos or watermark.

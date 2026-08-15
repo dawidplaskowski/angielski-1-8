@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: printable children's board-game master background, portrait A2 composition
+Primary request: Create a spectacular, warm, richly colored illustrated space journey for an English-learning board game for children ages 7–9. The visual quality should match a premium modern children's picture book and a high-end classroom game.
+Scene/backdrop: one continuous portrait journey beginning on a cheerful green-and-blue Earth landscape at the bottom, rising through a luminous star field past the Moon and colorful recognizable planets, and ending at a friendly futuristic space station near the top.
+Subject: a small friendly rocket traveling upward, two fair-skinned Central European children (a light-brown-haired boy and a medium-brown-haired girl) as astronauts floating safely near the outer edges, a cute non-scary alien waving from a tiny planet, satellites, comets and planets.
+Style/medium: polished hand-painted digital illustration, soft gouache texture, expressive crisp outlines, layered depth, premium educational-game artwork, charming but not babyish
+Composition/framing: portrait orientation close to A-series paper ratio. Leave a broad calm winding corridor with low visual detail for a 32-space game path. Keep important objects away from the exact vertical and horizontal page seams.
+Lighting/mood: luminous, adventurous, safe and joyful; excellent print contrast
+Color palette: deep navy and violet balanced with turquoise, coral, golden yellow, mint and bright planetary colors
+Constraints: background illustration only; no text, letters, numbers, signs, labels, game-board spaces, tokens, dice, arrows, UI, borders, logos, trademarks or watermark.

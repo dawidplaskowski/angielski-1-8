@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: printable children's board-game master background, portrait A2
+Scene: a joyful route from a picnic garden past fruit, bakery, vegetable, café and food-truck stalls to a festive outdoor banquet.
+Subjects: colorful healthy food, bread, cupcakes, soup, pasta, stalls and bunting; no humans or branded packaging.
+Style: premium modern children's picture-book illustration, polished digital gouache.
+Composition: a broad calm winding corridor for 32 deterministic game spaces; focal objects away from A4 seams.
+Constraints: background only; no text, letters, numbers, menus, prices, game path, spaces, UI, logos or watermark.
