@@ -157,7 +157,7 @@ function renderPages(){
 }
 
 function syncPacks(reset){
-  const select=$('#pack-select'), available=TASK_PACKS;
+  const select=$('#pack-select'), available=TASK_PACKS.filter((p)=>p.theme===state.boardId);
   if(reset||!available.some((p)=>p.id===state.packId)) state.packId=available[0].id;
   select.innerHTML=''; available.forEach((p)=>{const o=el('option',null,p.title);o.value=p.id;select.appendChild(o);}); select.value=state.packId;
 }
@@ -170,19 +170,21 @@ function init(){
   if(['list','cards'].includes(params.get('format'))) state.format=params.get('format');
   if(params.has('answers')) state.answers=params.get('answers')!=='0';
   if(params.has('specials')) state.specials=params.get('specials')!=='0';
-  const requestedPack=TASK_PACKS.find((p)=>p.id===params.get('pack')); if(requestedPack) state.packId=requestedPack.id;
+  if(params.get('output')==='board') document.body.classList.add('board-only');
+  if(params.get('output')==='tasks') document.body.classList.add('tasks-only');
+  const requestedPack=TASK_PACKS.find((p)=>p.id===params.get('pack')&&p.theme===state.boardId); if(requestedPack) state.packId=requestedPack.id;
   const boardSelect=$('#board-select'); BOARD_THEMES.forEach((b)=>{const o=el('option',null,b.title);o.value=b.id;boardSelect.appendChild(o);}); boardSelect.value=state.boardId;
   syncPacks(!requestedPack); $('#mode-select').value=state.mode; $('#format-select').value=state.format;
   $('#answers-toggle').checked=state.answers; $('#specials-toggle').checked=state.specials;
-  boardSelect.onchange=(e)=>{state.boardId=e.target.value;renderPages();};
+  boardSelect.onchange=(e)=>{state.boardId=e.target.value;syncPacks(true);renderPages();};
   $('#mode-select').onchange=(e)=>{state.mode=e.target.value;renderPages();};
   $('#pack-select').onchange=(e)=>{state.packId=e.target.value;renderPages();};
   $('#format-select').onchange=(e)=>{state.format=e.target.value;renderPages();};
   $('#answers-toggle').onchange=(e)=>{state.answers=e.target.checked;renderPages();};
   $('#specials-toggle').onchange=(e)=>{state.specials=e.target.checked;renderPages();};
-  $('#print-board').onclick=()=>{document.body.classList.add('board-only');window.print();};
-  $('#print-pack').onclick=()=>{document.body.classList.remove('board-only');window.print();};
-  addEventListener('afterprint',()=>document.body.classList.remove('board-only'));
+  $('#print-board').onclick=()=>{document.body.classList.remove('tasks-only');document.body.classList.add('board-only');window.print();};
+  $('#print-tasks').onclick=()=>{document.body.classList.remove('board-only');document.body.classList.add('tasks-only');window.print();};
+  addEventListener('afterprint',()=>document.body.classList.remove('board-only','tasks-only'));
   const dialog=$('#board-preview-dialog'); $('#open-board-preview').onclick=()=>dialog.showModal(); $('#close-board-preview').onclick=()=>dialog.close();
   dialog.addEventListener('click',(e)=>{if(e.target===dialog)dialog.close();}); renderPages();
 }

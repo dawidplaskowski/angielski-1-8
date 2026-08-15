@@ -1,4 +1,4 @@
-// Zestawy są niezależne od plansz: tę samą talię można połączyć z dowolnym motywem.
+// Zestawy są przypisane do plansz: polecenia mogą bezpiecznie odwoływać się do ilustracji.
 (function () {
   const pack = (id, theme, grade, title, rows) => ({
     id, theme, grade:String(grade), title,
@@ -216,4 +216,133 @@
       ['production','Minuta mówienia: opowiedz o wymarzonej misji kosmicznej.','samodzielna, zrozumiała wypowiedź','','🏆'],
     ]),
   ];
+
+  // Każda nowa plansza ma własne słownictwo. Generatory zachowują wspólną
+  // progresję dydaktyczną, ale wszystkie polecenia i odpowiedzi czerpią z motywu.
+  const themes = [
+    { id:'pirate', label:'Piraci', action:'Kołysz się jak statek i powiedz “ship”.', actionAnswer:'ship',
+      words:[['ship','statek','🚢'],['treasure','skarb','💰'],['island','wyspa','🏝️'],['parrot','papuga','🦜'],['monkey','małpa','🐒'],['beach','plaża','🏖️'],['palm tree','palma','🌴'],['cave','jaskinia','🕳️'],['waterfall','wodospad','💧'],['sea','morze','🌊'],['map','mapa','🗺️'],['compass','kompas','🧭'],['shell','muszla','🐚'],['flag','flaga','🏁'],['chest','skrzynia','📦'],['bridge','most','🌉']] },
+    { id:'city', label:'Miasto', action:'Udawaj, że prowadzisz autobus i powiedz “bus”.', actionAnswer:'bus',
+      words:[['bus','autobus','🚌'],['tram','tramwaj','🚊'],['bicycle','rower','🚲'],['bridge','most','🌉'],['river','rzeka','🌊'],['market','targ','🛒'],['fountain','fontanna','⛲'],['tower','wieża','🗼'],['park','park','🌳'],['street','ulica','🛣️'],['shop','sklep','🏪'],['museum','muzeum','🏛️'],['boat','łódź','🚤'],['bench','ławka','🪑'],['clock','zegar','🕰️'],['tree','drzewo','🌳']] },
+    { id:'magic', label:'Magia', action:'Poruszaj dłońmi jak czarodziej i powiedz “magic”.', actionAnswer:'magic',
+      words:[['castle','zamek','🏰'],['gate','brama','🚪'],['owl','sowa','🦉'],['dragon','smok','🐉'],['book','książka','📖'],['library','biblioteka','📚'],['potion','eliksir','🧪'],['greenhouse','szklarnia','🌿'],['tower','wieża','🗼'],['telescope','teleskop','🔭'],['garden','ogród','🌷'],['lantern','latarnia','🏮'],['stairs','schody','🪜'],['flower','kwiat','🌸'],['star','gwiazda','⭐'],['key','klucz','🔑']] },
+    { id:'dinosaur', label:'Dinozaury', action:'Idź ciężkimi krokami jak dinozaur i powiedz “dinosaur”.', actionAnswer:'dinosaur',
+      words:[['dinosaur','dinozaur','🦕'],['Triceratops','triceratops','🦖'],['Stegosaurus','stegozaur','🦕'],['Brachiosaurus','brachiozaur','🦕'],['egg','jajko','🥚'],['fossil','skamielina','🦴'],['footprint','ślad','🐾'],['fern','paproć','🌿'],['river','rzeka','🌊'],['volcano','wulkan','🌋'],['nest','gniazdo','🪺'],['cave','jaskinia','🕳️'],['camp','obóz','⛺'],['dragonfly','ważka','🪰'],['tail','ogon','🦴'],['horn','róg','📯']] },
+    { id:'food', label:'Jedzenie', action:'Udawaj, że mieszasz zupę i powiedz “soup”.', actionAnswer:'soup',
+      words:[['apple','jabłko','🍎'],['banana','banan','🍌'],['strawberry','truskawka','🍓'],['tomato','pomidor','🍅'],['carrot','marchewka','🥕'],['bread','chleb','🍞'],['cupcake','babeczka','🧁'],['soup','zupa','🥣'],['sandwich','kanapka','🥪'],['juice','sok','🧃'],['basket','koszyk','🧺'],['market','targ','🛒'],['picnic','piknik','🧺'],['café','kawiarnia','☕'],['plate','talerz','🍽️'],['salad','sałatka','🥗']] },
+    { id:'seasons', label:'Pory roku', action:'Zadrżyj jak zimą i powiedz “winter”.', actionAnswer:'winter',
+      words:[['winter','zima','❄️'],['spring','wiosna','🌷'],['summer','lato','☀️'],['autumn','jesień','🍂'],['snowman','bałwan','⛄'],['snow','śnieg','❄️'],['flower','kwiat','🌸'],['butterfly','motyl','🦋'],['stream','strumień','🌊'],['sun','słońce','☀️'],['tree','drzewo','🌳'],['leaf','liść','🍃'],['pumpkin','dynia','🎃'],['bird','ptak','🐦'],['rain','deszcz','🌧️'],['gazebo','altana','🏡']] },
+  ];
+
+  const themedRows = (d, grade) => {
+    const w=(i)=>d.words[i][0], pl=(i)=>d.words[i][1], ic=(i)=>d.words[i][2];
+    const noArticle=new Set(['treasure','sea','magic','stairs','winter','spring','summer','autumn','snow','rain']);
+    const withArticle=(i)=>noArticle.has(w(i))?w(i):`${/^[aeiou]/i.test(w(i))?'an':'a'} ${w(i)}`;
+    if (grade === 1) return [
+      ['recognition',`Nazwij po angielsku: ${ic(0)}`,w(0),'Jedno słowo wystarczy.',ic(0)],
+      ['listening',`Znajdź na planszy ${pl(1)}. Powiedz “${w(1)}”.`,w(1),'Dziecko wskazuje element ilustracji.',ic(1)],
+      ['recognition',`Powtórz trzy razy: ${w(2)}.`,w(2),'Ćwiczenie wymowy.',ic(2)],
+      ['counting',`Policz: ${ic(3)} ${ic(3)} ${ic(3)}`,'three','Akceptuj samą liczbę.',ic(3)],
+      ['classification',`Który obrazek oznacza “${w(4)}”: ${ic(4)} czy ${ic(5)}?`,w(4),'',ic(4)],
+      ['movement',d.action,d.actionAnswer,'Ruch i słowo wykonujemy razem.','🎭'],
+      ['recognition',`Jak jest po angielsku „${pl(5)}”?`,w(5),'',ic(5)],
+      ['listening',`Podnieś rękę, gdy usłyszysz słowo z planszy: chair, ${w(6)}, pencil.`,w(6),'',ic(6)],
+      ['production',`Powiedz: “It is ${withArticle(7)}.”`,`It is ${withArticle(7)}.`,'Pełne zdanie albo samo słowo.',ic(7)],
+      ['listening',`Wskaż na planszy ${pl(8)}.`,w(8),'Następnie dziecko mówi słowo.',ic(8)],
+      ['counting',`Powiedz liczbę po angielsku: ${ic(9)} ${ic(9)}`,'two','',ic(9)],
+      ['production',`Powiedz: “I can see ${withArticle(10)}.”`,`I can see ${withArticle(10)}.`,'',ic(10)],
+      ['classification',`Które pasuje do tej planszy: ${w(11)} czy bedroom?`,w(11),'',ic(11)],
+      ['recognition',`Nazwij obrazek: ${ic(12)}`,w(12),'',ic(12)],
+      ['listening',`Dotknij ilustracji, gdy usłyszysz: ${w(13)}.`,w(13),'Prowadzący miesza słowo z dwoma innymi.',ic(13)],
+      ['production',`Powiedz: “I like the ${w(14)}.”`,`I like the ${w(14)}.`,'',ic(14)],
+      ['movement',`Narysuj palcem w powietrzu ${pl(15)} i powiedz “${w(15)}”.`,w(15),'',ic(15)],
+      ['recognition',`Co znaczy “${w(1)}”?`,pl(1),'',ic(1)],
+      ['counting',`Pokaż jeden palec i powiedz “one ${w(2)}”.`,`one ${w(2)}`,'',ic(2)],
+      ['counting',`Policz do czterech, patrząc na ${pl(3)}.`,'one, two, three, four','',ic(3)],
+      ['classification',`Które słowo jest z innego tematu: ${w(4)}, ${w(5)}, rocket?`,'rocket','',ic(4)],
+      ['production',`Powiedz: “This is my ${w(6)}.”`,`This is my ${w(6)}.`,'',ic(6)],
+      ['dialogue',`Odpowiedz: Do you like ${w(7)}?`,'Yes, I do. / No, I don’t.','',ic(7)],
+      ['recognition',`Nazwij bez podpowiedzi: ${ic(8)}`,w(8),'',ic(8)],
+      ['listening',`Znajdź ${pl(9)} i klaśnij raz.`,w(9),'',ic(9)],
+      ['production',`Wybierz kolor dla ${pl(10)} i powiedz go po angielsku.`,'dowolny poprawny kolor','',ic(10)],
+      ['production',`Połącz dwa słowa: big + ${w(11)}.`,`big ${w(11)}`,'',ic(11)],
+      ['classification',`Co widzisz na planszy: ${w(12)} czy spaceship?`,w(12),'',ic(12)],
+      ['dialogue',`Odpowiedz pełnym wzorem: What can you see? — I can see…`,`I can see ${withArticle(13)}.`,'',ic(13)],
+      ['movement',`Podziel słowo “${w(14)}” na sylaby, klaszcząc.`,w(14),'Liczy się próba poprawnej wymowy.',ic(14)],
+      ['recognition','Wymień trzy angielskie słowa z tej planszy.','dowolne 3 słowa z zestawu','', '3️⃣'],
+      ['production',`Wybierz ulubiony element planszy i nazwij go po angielsku.`,`np. ${w(15)}`,'', '⭐'],
+    ];
+    if (grade === 2) return [
+      ['translation',`Przetłumacz na angielski: „${pl(0)}”.`,w(0),'',ic(0)],
+      ['production',`Wymień cztery rzeczy widoczne na planszy ${d.label}.`,'4 poprawne słowa z zestawu','', '4️⃣'],
+      ['reasoning',`Odd one out: ${w(1)}, ${w(2)}, pencil. Uzasadnij jednym słowem.`,'pencil','',ic(1)],
+      ['production',`Ułóż zdanie z “There is” i słowem ${w(3)}.`,`There is ${withArticle(3)}.`,'',ic(3)],
+      ['counting',`Powiedz po angielsku: dwa razy ${pl(4)}.`,'two poprawnie odmienione rzeczowniki','Prowadzący sprawdza liczbę mnogą.',ic(4)],
+      ['production',`Opisz ${pl(5)} dwoma przymiotnikami.`,`np. a big, beautiful ${w(5)}`,'',ic(5)],
+      ['dialogue',`Zapytaj kolegę: Can you see the ${w(6)}?`,'Yes, I can. / No, I can’t.','',ic(6)],
+      ['classification',`Podziel na miejsce i rzecz: ${w(7)}, ${w(8)}, ${w(9)}, ${w(10)}.`,'logiczny podział','',ic(7)],
+      ['listening',`Prowadzący mówi 3 słowa. Powtórz tylko te związane z ${d.label}.`,'poprawnie wybrane słowa','Prowadzący dodaje jedno słowo z innego tematu.','👂'],
+      ['production',`Ułóż zdanie: I can see… + ${w(11)}.`,`I can see ${withArticle(11)}.`,'',ic(11)],
+      ['reasoning',`Co jest bliżej STARTU na ilustracji: ${w(12)} czy ${w(13)}?`,'odpowiedź zgodna z planszą','',ic(12)],
+      ['translation',`Jak powiesz „Widzę ${pl(14)}”?`,`I can see ${withArticle(14)}.`,'',ic(14)],
+      ['movement',`Pokaż ruchem ${w(0)}, a grupa zgaduje słowo.`,w(0),'',ic(0)],
+      ['classification',`Podaj kategorię dla słów ${w(1)}, ${w(2)} i ${w(3)}.`,d.label,'Akceptuj logiczną angielską kategorię.',ic(2)],
+      ['production',`Dokończ: My favourite thing here is…`,`My favourite thing here is the ${w(4)}.`,'',ic(4)],
+      ['dialogue',`Zadaj pytanie “Where is the ${w(5)}?” i odpowiedz, wskazując planszę.`,'It is here / there / next to…','',ic(5)],
+      ['reasoning',`Które słowo nie jest rzeczownikiem: ${w(6)}, ${w(7)}, run?`,'run','',ic(6)],
+      ['translation',`Przetłumacz: „To jest duży ${pl(8)}”.`,`This is a big ${w(8)}.`,'',ic(8)],
+      ['production',`Użyj ${w(9)} i ${w(10)} w jednym zdaniu.`,'jedno logiczne zdanie','',ic(9)],
+      ['classification',`Ułóż alfabetycznie: ${w(11)}, ${w(12)}, ${w(13)}.`,'poprawna kolejność alfabetyczna','',ic(11)],
+      ['dialogue',`Zapytaj: Do you like the ${w(14)}? Dodaj krótką odpowiedź.`,'Yes, I do. / No, I don’t.','',ic(14)],
+      ['reasoning',`Znajdź wspólną cechę ${w(0)} i ${w(15)}.`,'logiczna cecha','',ic(15)],
+      ['production',`Opisz położenie ${w(1)} używając left albo right.`,'zdanie zgodne z ilustracją','',ic(1)],
+      ['translation',`Jak jest po angielsku: „Na planszy jest ${pl(2)}”?`,`There is ${withArticle(2)} on the board.`,'',ic(2)],
+      ['movement',`Bez słów pokaż ${w(3)}. Pozostali zgadują po angielsku.`,w(3),'',ic(3)],
+      ['production',`Ułóż pytanie zaczynające się od “Is there…”, używając ${w(4)}.`,`Is there ${withArticle(4)}?`,'',ic(4)],
+      ['reasoning',`Wybierz lepszy przymiotnik dla ${w(5)}: tiny czy huge. Uzasadnij.`,'odpowiedź zgodna z ilustracją','',ic(5)],
+      ['classification',`Wskaż dwa słowa z planszy, które można połączyć w parę.`,`np. ${w(6)} + ${w(7)}`,'',ic(6)],
+      ['dialogue',`Odegraj mini-dialog: “What is this?” — wskaż ${w(8)}.`,`It is ${withArticle(8)}.`,'',ic(8)],
+      ['production',`Powiedz trzy zdania o planszy, używając I can see.`,'3 poprawne zdania','', '💬'],
+      ['reasoning',`Zapamiętaj: ${w(9)}, ${w(10)}, ${w(11)}. Odwróć wzrok i powtórz.`,'3 słowa w poprawnej kolejności','', '🧠'],
+      ['production',`Nadaj planszy nowy angielski tytuł związany z ${d.label}.`,'logiczny tytuł po angielsku','', '✏️'],
+    ];
+    return [
+      ['production',`Opisz ${w(0)} bez używania jego nazwy. Grupa zgaduje.`,w(0),'Minimum dwie wskazówki.',ic(0)],
+      ['reasoning',`Odd one out: ${w(1)}, ${w(2)}, ${w(3)}, laptop. Uzasadnij.`,'laptop','',ic(1)],
+      ['dialogue',`Przeprowadź trzy-pytaniowy wywiad o wyprawie ${d.label}.`,'3 pytania i odpowiedzi','', '🎤'],
+      ['translation',`Przetłumacz: „Na planszy widzę ${pl(4)} i ${pl(5)}”.`,`I can see ${withArticle(4)} and ${withArticle(5)} on the board.`,'',ic(4)],
+      ['production',`Porównaj ${w(6)} i ${w(7)} w dwóch zdaniach.`,'2 logiczne porównania','',ic(6)],
+      ['classification',`Podziel ${w(8)}, ${w(9)}, ${w(10)}, ${w(11)} na dwie własne kategorie.`,'logiczny podział z nazwami kategorii','',ic(8)],
+      ['reasoning','Popraw zdanie: “There is two things on the board.”','There are two things on the board.','',ic(12)],
+      ['production',`Ułóż krótką historię z wyrazami ${w(0)}, ${w(1)} i ${w(2)}.`,'3 spójne zdania','', '📖'],
+      ['dialogue',`Poproś partnera o wskazanie ${w(3)}, a potem zamieńcie się rolami.`,'uprzejma prośba i reakcja','',ic(3)],
+      ['translation',`Jak powiesz: „Gdzie jest ${pl(4)}?”`,`Where is the ${w(4)}?`,'',ic(4)],
+      ['production',`Wymyśl nazwę miejsca związanego z ${d.label} i opisz je trzema przymiotnikami.`,'nazwa i 3 poprawne przymiotniki','', '✨'],
+      ['reasoning',`Dlaczego ${w(5)} jest ważny na tej ilustracji? Odpowiedz pełnym zdaniem.`,'logiczne zdanie','',ic(5)],
+      ['classification',`Wybierz z zestawu trzy rzeczowniki i dodaj do każdego przymiotnik.`,'3 poprawne połączenia','', '🗂️'],
+      ['dialogue',`Zadaj dwa pytania zaczynające się od “Can you see…?”`,'2 poprawne pytania','', '❓'],
+      ['production',`Opisz drogę od STARTU do ${w(6)} używając first, then, finally.`,'wypowiedź trzyetapowa','',ic(6)],
+      ['reasoning',`Co nie pasuje: ${w(7)}, ${w(8)}, ${w(9)}, quickly?`,'quickly — nie jest rzeczownikiem','',ic(7)],
+      ['translation',`Przetłumacz: „Obok ${pl(10)} znajduje się ${pl(11)}”.`,`There is a ${w(11)} next to the ${w(10)}.`,'Akceptuj odwrotny szyk przy zachowaniu sensu.',ic(10)],
+      ['production',`Ułóż pytanie do odpowiedzi: “It is near the ${w(12)}.”`,`Where is it?`,'',ic(12)],
+      ['dialogue',`W parach wybierzcie trzy najciekawsze elementy planszy i uzgodnijcie kolejność.`,'3 elementy i krótka rozmowa','', '🤝'],
+      ['reasoning',`Ułóż od najmniejszego do największego: ${w(13)}, ${w(14)}, ${w(15)}.`,'kolejność uzasadniona ilustracją lub wiedzą','',ic(13)],
+      ['production',`Zastosuj konstrukcję “There is” i “There are” w dwóch zdaniach o planszy.`,'2 poprawne zdania','', '💬'],
+      ['classification',`Znajdź pięć słów z planszy i ułóż je alfabetycznie.`,'5 słów w poprawnej kolejności','', '🔤'],
+      ['translation',`Jak powiesz: „Chciałbym zobaczyć ${pl(0)}”?`,`I would like to see the ${w(0)}.`,'',ic(0)],
+      ['dialogue',`Odegraj przewodnika: poleć partnerowi dwa miejsca lub obiekty z planszy.`,'2 rekomendacje z uzasadnieniem','', '🗣️'],
+      ['reasoning',`Wybierz element, który najlepiej symbolizuje ${d.label}, i uzasadnij.`,'logiczny wybór i uzasadnienie','', '🤔'],
+      ['production',`Opowiedz, co wydarzyło się przed sceną widoczną na planszy.`,'minimum 3 spójne zdania w czasie przeszłym','', '⏪'],
+      ['translation',`Przetłumacz: „Gdy dotrzemy do mety, zobaczymy ${pl(1)}”.`,`When we reach the finish, we will see the ${w(1)}.`,'',ic(1)],
+      ['classification',`Podaj po dwa słowa z planszy do kategorii: places, objects, nature.`,'6 logicznie dobranych słów','', '3️⃣'],
+      ['dialogue',`Zorganizuj rozmowę: jedna osoba opisuje ${w(2)}, druga zadaje dwa pytania.`,'opis i 2 pytania','',ic(2)],
+      ['reasoning',`Znajdź na ilustracji przyczynę i skutek. Opisz je używając because.`,'logiczne zdanie z because','', '🔗'],
+      ['production',`Przekonaj grupę, że warto odwiedzić świat ${d.label}.`,'minimum 2 argumenty','', '📣'],
+      ['production',`Minuta mówienia: opowiedz własną przygodę na tej planszy.`,'samodzielna, spójna wypowiedź','', '🏆'],
+    ];
+  };
+
+  themes.forEach((theme)=>[1,2,3].forEach((grade)=>{
+    window.TASK_PACKS.push(pack(`${theme.id}-${grade}`,theme.id,grade,`${theme.label} · klasa ${grade}`,themedRows(theme,grade)));
+  }));
 })();

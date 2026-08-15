@@ -20,7 +20,7 @@ function boardCard(theme){
   const badge=el('span','cover-badge','4 × A4'); art.appendChild(badge); card.appendChild(art);
   const body=el('div','material-body'); body.appendChild(el('span','material-kind','PLANSZA'));
   body.appendChild(el('h3',null,theme.title)); body.appendChild(el('p',null,theme.description));
-  body.appendChild(materialTags(['klasy 1–3','pusta lub numerowana','6 uniwersalnych zestawów']));
+  body.appendChild(materialTags(['klasy 1–3','pusta lub numerowana','3 talie tematyczne']));
   const a=el('a','open-material','Otwórz konfigurator →');a.href=`board.html?id=${theme.id}`;body.appendChild(a);card.appendChild(body);return card;
 }
 
