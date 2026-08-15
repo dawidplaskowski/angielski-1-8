@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plansze do nauki angielskiego</title>
+  <link rel="stylesheet" href="fonts/andika.css">
+  <link rel="stylesheet" href="board.css">
+</head>
+<body>
+  <header class="board-header no-print">
+    <a class="back-link" href="index.html#plansze">← Biblioteka</a>
+    <div class="board-heading"><strong id="page-title">Plansza</strong><span>uniwersalna gra do druku 4 × A4</span></div>
+    <div class="header-actions">
+      <button id="print-board">Tylko plansza</button>
+      <button id="print-pack" class="primary">Drukuj komplet</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="configurator no-print" aria-label="Konfigurator wydruku">
+      <div class="config-intro"><span class="eyebrow">KONFIGURATOR</span><h1 id="config-title"></h1><p id="config-description"></p></div>
+      <div class="config-grid">
+        <label>Motyw<select id="board-select"></select></label>
+        <label>Wygląd pól<select id="mode-select"><option value="numbered">Same numery</option><option value="blank">Puste pola</option></select></label>
+        <label>Zestaw zadań<select id="pack-select"></select></label>
+        <label>Format zadań<select id="format-select"><option value="list">Lista 1–32</option><option value="cards">Karty do wycięcia</option></select></label>
+        <label class="check"><input id="answers-toggle" type="checkbox" checked><span>Pokazuj odpowiedzi</span></label>
+      </div>
+      <p class="config-note">Planszę laminujesz raz. Na kolejne lekcje drukujesz tylko inną listę albo talię zadań.</p>
+    </section>
+    <div class="preview-label no-print">Podgląd wydruku</div>
+    <div id="pages"></div>
+  </main>
+
+  <script src="data/boards.js"></script>
+  <script src="data/task-packs.js"></script>
+  <script src="board.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ const fs = require('fs');
 global.window = global;
 global.document = { getElementById: () => null, querySelector: () => null };
 
-const files = ['data/icons.js', 'data/games.js', 'data/decks-1-3.js', 'data/decks-4.js', 'data/decks-5-6.js', 'data/decks-7-8.js', 'data/animal-adventure.js'];
+const files = ['data/icons.js', 'data/games.js', 'data/decks-1-3.js', 'data/decks-4.js', 'data/decks-5-6.js', 'data/decks-7-8.js', 'data/boards.js', 'data/task-packs.js'];
 const src = files.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
 const app = fs.readFileSync('app.js', 'utf8');
 const tests = fs.readFileSync('test.html', 'utf8').split('<script>').pop().split('</script>')[0];

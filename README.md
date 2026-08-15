@@ -1,16 +1,20 @@
-# Angielski 1–8 — karty i gry do druku
+# English Toolbox — plansze, karty i gry do druku
 
-Statyczna strona: wybierasz talię i grę, klikasz **Drukuj**, dostajesz gotowe karty na A4.
+Statyczna biblioteka materiałów: wybierasz planszę, talię albo grę, konfigurujesz wariant
+i klikasz **Drukuj**. Wszystkie materiały są przygotowane na A4.
 Bez instalacji, bez konta, bez internetu (po pobraniu folderu).
 
 **73 talie · ok. 1900 haseł** — słownictwo i gramatyka dla klas 1–3, 4, 5–6 i 7–8.
 
-Na ekranie startowym dostępna jest też **Animal Adventure** — pełnokolorowa gra
-planszowa dla klas 1–3. Cztery arkusze A4 tworzą jedną planszę A2; pakiet zawiera
-zasady, klucz odpowiedzi i pomoc językową.
+Biblioteka zawiera osiem pełnokolorowych plansz dla klas 1–3: **Animal Adventure**,
+**Space Mission**, **Pirate Treasure**, **City Quest**, **Magic Academy**,
+**Dinosaur Expedition**, **Food Festival** i **Four Seasons**. Cztery arkusze A4 tworzą
+jedną planszę A2. Każda ma wariant numerowany i pusty oraz współpracuje z sześcioma
+uniwersalnymi zestawami po 32 zadania — Animal i Space dla klasy 1, 2 i 3.
 
 **Użycie:** otwórz `index.html` w przeglądarce (albo wejdź na link GitHub Pages).
-Filtruj po klasie i zakresie, albo wpisz szukane słowo → kliknij talię → wybierz grę → **Drukuj**.
+Filtruj po klasie, temacie i rodzaju materiału. Przy planszy wybierz wygląd pól, klasę,
+listę lub karty oraz widoczność odpowiedzi. Przy talii wybierz grę, a potem **Drukuj**.
 Drukuj na papierze 160–250 g, karty tnij po przerywanej linii.
 
 ## Trzy typy talii
@@ -56,20 +60,25 @@ Pasek u dołu każdej karty koduje poziom (1–3 zielony, 4 niebieski, 5–6 fio
 ## Struktura plików
 
 ```
-index.html          panel filtrów + widok roboczy
+index.html          biblioteka plansz, kart i gier
+library.js          filtry, kafle i nawigacja biblioteki
 app.js              filtrowanie, 4 rendery gier, ikony, tasowanie
 style.css           ekran + wymiary karty 63×88 mm
 print.css           @page A4, 9 kart na stronę, ukrycie interfejsu
+board.html          wspólny konfigurator plansz
+board.js            warianty planszy, listy, karty i zasady
+board.css           podgląd oraz wydruk A2 z 4 stron A4
 fonts/andika.css    krój Andika (SIL, OFL) wpisany jako data: URI
 data/icons.js       PLIK GENEROWANY — sprite ikon OpenMoji
 data/games.js       opisy typów talii i zasady gier
-data/animal-adventure.js  pola i odpowiedzi planszy Animal Adventure
+data/boards.js      motywy, kolory i współrzędne pól plansz
+data/task-packs.js  6 zestawów zadań planszowych po 32 pozycje
 data/decks-1-3.js   talie dla klas 1–3
 data/decks-4.js     talie dla klasy 4
 data/decks-5-6.js   talie dla klas 5–6
 data/decks-7-8.js   talie dla klas 7–8
 test.html           testy w przeglądarce
-animal-adventure.html  plansza A2 i strony pomocnicze
+animal-adventure.html  zgodnościowe przekierowanie do konfiguratora
 run-tests.js        te same testy w konsoli: node run-tests.js
 tools/build-icons.js  przebudowa sprite'u ikon (wymaga internetu)
 tools/build-font.js   przebudowa zawężonego kroju pisma

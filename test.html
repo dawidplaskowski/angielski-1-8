@@ -25,7 +25,8 @@
 <script src="data/decks-4.js"></script>
 <script src="data/decks-5-6.js"></script>
 <script src="data/decks-7-8.js"></script>
-<script src="data/animal-adventure.js"></script>
+<script src="data/boards.js"></script>
+<script src="data/task-packs.js"></script>
 <script src="app.js"></script>
 <script>
 const results = [];
@@ -252,44 +253,44 @@ check('bingo dostaje 25 unikalnych pól', () => {
   assert(new Set(board).size === 25, 'powtórzone hasła na planszy');
 });
 
-check('Animal Adventure ma 32 kolejne pola', () => {
-  assert(ANIMAL_ADVENTURE.fields.length === 32, `${ANIMAL_ADVENTURE.fields.length} pól zamiast 32`);
-  ANIMAL_ADVENTURE.fields.forEach((f, i) => assert(f.n === i + 1, `pole ${i + 1} ma numer ${f.n}`));
-  assert(ANIMAL_ADVENTURE.fields[0].kind === 'start', 'pierwsze pole nie jest START');
-  assert(ANIMAL_ADVENTURE.fields.at(-1).kind === 'finish', 'ostatnie pole nie jest metą');
-});
-
-check('Animal Adventure ma 24 zadania i 6 pól specjalnych', () => {
-  const tasks = ANIMAL_ADVENTURE.fields.filter(f => f.kind === 'task');
-  const special = ANIMAL_ADVENTURE.fields.filter(f => f.kind.startsWith('special'));
-  assert(tasks.length === 24, `${tasks.length} zadań zamiast 24`);
-  assert(special.length === 6, `${special.length} pól specjalnych zamiast 6`);
-});
-
-check('każde zadanie planszy ma dwa poziomy i odpowiedź', () => {
-  for (const f of ANIMAL_ADVENTURE.fields.filter(x => x.kind === 'task')) {
-    assert(f.easy && f.hard && f.answer, `pole ${f.n} jest niekompletne`);
-    assert(f.easy.length <= 24, `pole ${f.n}: za długie łatwe polecenie`);
-    assert(f.hard.length <= 36, `pole ${f.n}: za długie polecenie ★`);
+check('każdy motyw planszy ma 32 kolejne pola', () => {
+  assert(BOARD_THEMES.length === 8, `oczekiwano 8 motywów, jest ${BOARD_THEMES.length}`);
+  assert(new Set(BOARD_THEMES.map(b => b.id)).size === BOARD_THEMES.length, 'powtórzone id planszy');
+  for (const board of BOARD_THEMES) {
+    assert(board.fields.length === 32, `${board.id}: ${board.fields.length} pól`);
+    board.fields.forEach((f, i) => assert(f.n === i + 1, `${board.id}: pole ${i + 1} ma numer ${f.n}`));
+    assert(board.fields[0].kind === 'start', `${board.id}: brak START`);
+    assert(board.fields.at(-1).kind === 'finish', `${board.id}: brak mety`);
+    assert(board.fields.filter(f => f.kind === 'special').length === 6, `${board.id}: zła liczba pól specjalnych`);
   }
 });
 
-check('pola planszy mieszczą się na A2 i omijają łączenia', () => {
-  const { width, height } = ANIMAL_ADVENTURE.size;
-  for (const f of ANIMAL_ADVENTURE.fields) {
-    assert(f.x >= 20 && f.x <= width - 20, `pole ${f.n}: x=${f.x} przy krawędzi`);
-    assert(f.y >= 20 && f.y <= height - 20, `pole ${f.n}: y=${f.y} przy krawędzi`);
-    assert(Math.abs(f.x - width / 2) >= 18, `pole ${f.n} wpada na pionowe łączenie`);
-    assert(Math.abs(f.y - height / 2) >= 18, `pole ${f.n} wpada na poziome łączenie`);
+check('pola plansz mieszczą się na A2 i omijają łączenia', () => {
+  for (const board of BOARD_THEMES) for (const f of board.fields) {
+    assert(f.x >= 20 && f.x <= 400, `${board.id}/${f.n}: x=${f.x}`);
+    assert(f.y >= 20 && f.y <= 574, `${board.id}/${f.n}: y=${f.y}`);
+    assert(Math.abs(f.x - 210) >= 18, `${board.id}/${f.n}: pionowe łączenie`);
+    assert(Math.abs(f.y - 297) >= 18, `${board.id}/${f.n}: poziome łączenie`);
   }
 });
 
-check('każda ikona Animal Adventure istnieje w OpenMoji', () => {
-  const missing = [];
-  for (const f of ANIMAL_ADVENTURE.fields) {
-    for (const emoji of f.icons || [f.icon]) if (emoji && !OM_MAP[emoji]) missing.push(`${f.n}:${emoji}`);
+check('uniwersalne talie obejmują oba tematy i klasy 1–3', () => {
+  for (const theme of ['animal','space']) for (const grade of ['1','2','3']) {
+    const found = TASK_PACKS.filter(p => p.theme === theme && p.grade === grade);
+    assert(found.length === 1, `${theme}/kl.${grade}: ${found.length} talii`);
   }
-  assert(!missing.length, 'brak ikon: ' + missing.join(', '));
+});
+
+check('każda talia planszowa ma 32 różnorodne zadania', () => {
+  for (const pack of TASK_PACKS) {
+    assert(pack.tasks.length === 32, `${pack.id}: ${pack.tasks.length} zadań`);
+    assert(new Set(pack.tasks.map(t => t.prompt)).size === 32, `${pack.id}: powtórzone polecenia`);
+    assert(new Set(pack.tasks.map(t => t.type)).size >= 5, `${pack.id}: za mało typów aktywności`);
+    pack.tasks.forEach((t, i) => {
+      assert(t.n === i + 1, `${pack.id}: zły numer ${t.n}`);
+      assert(t.prompt && t.answer && t.type, `${pack.id}/${t.n}: brak danych`);
+    });
+  }
 });
 
 check('filtry zawężają listę i szukanie działa', () => {
