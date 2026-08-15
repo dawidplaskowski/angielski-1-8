@@ -5,6 +5,10 @@ Bez instalacji, bez konta, bez internetu (po pobraniu folderu).
 
 **73 talie · ok. 1900 haseł** — słownictwo i gramatyka dla klas 1–3, 4, 5–6 i 7–8.
 
+Na ekranie startowym dostępna jest też **Animal Adventure** — pełnokolorowa gra
+planszowa dla klas 1–3. Cztery arkusze A4 tworzą jedną planszę A2; pakiet zawiera
+zasady, klucz odpowiedzi i pomoc językową.
+
 **Użycie:** otwórz `index.html` w przeglądarce (albo wejdź na link GitHub Pages).
 Filtruj po klasie i zakresie, albo wpisz szukane słowo → kliknij talię → wybierz grę → **Drukuj**.
 Drukuj na papierze 160–250 g, karty tnij po przerywanej linii.
@@ -59,11 +63,13 @@ print.css           @page A4, 9 kart na stronę, ukrycie interfejsu
 fonts/andika.css    krój Andika (SIL, OFL) wpisany jako data: URI
 data/icons.js       PLIK GENEROWANY — sprite ikon OpenMoji
 data/games.js       opisy typów talii i zasady gier
+data/animal-adventure.js  pola i odpowiedzi planszy Animal Adventure
 data/decks-1-3.js   talie dla klas 1–3
 data/decks-4.js     talie dla klasy 4
 data/decks-5-6.js   talie dla klas 5–6
 data/decks-7-8.js   talie dla klas 7–8
 test.html           testy w przeglądarce
+animal-adventure.html  plansza A2 i strony pomocnicze
 run-tests.js        te same testy w konsoli: node run-tests.js
 tools/build-icons.js  przebudowa sprite'u ikon (wymaga internetu)
 tools/build-font.js   przebudowa zawężonego kroju pisma

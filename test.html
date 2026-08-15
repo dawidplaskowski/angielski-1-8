@@ -25,6 +25,7 @@
 <script src="data/decks-4.js"></script>
 <script src="data/decks-5-6.js"></script>
 <script src="data/decks-7-8.js"></script>
+<script src="data/animal-adventure.js"></script>
 <script src="app.js"></script>
 <script>
 const results = [];
@@ -249,6 +250,46 @@ check('bingo dostaje 25 unikalnych pól', () => {
   const board = shuffle(wordPool(deck)).slice(0, 25);
   assert(board.length === 25, `${board.length} pól`);
   assert(new Set(board).size === 25, 'powtórzone hasła na planszy');
+});
+
+check('Animal Adventure ma 32 kolejne pola', () => {
+  assert(ANIMAL_ADVENTURE.fields.length === 32, `${ANIMAL_ADVENTURE.fields.length} pól zamiast 32`);
+  ANIMAL_ADVENTURE.fields.forEach((f, i) => assert(f.n === i + 1, `pole ${i + 1} ma numer ${f.n}`));
+  assert(ANIMAL_ADVENTURE.fields[0].kind === 'start', 'pierwsze pole nie jest START');
+  assert(ANIMAL_ADVENTURE.fields.at(-1).kind === 'finish', 'ostatnie pole nie jest metą');
+});
+
+check('Animal Adventure ma 24 zadania i 6 pól specjalnych', () => {
+  const tasks = ANIMAL_ADVENTURE.fields.filter(f => f.kind === 'task');
+  const special = ANIMAL_ADVENTURE.fields.filter(f => f.kind.startsWith('special'));
+  assert(tasks.length === 24, `${tasks.length} zadań zamiast 24`);
+  assert(special.length === 6, `${special.length} pól specjalnych zamiast 6`);
+});
+
+check('każde zadanie planszy ma dwa poziomy i odpowiedź', () => {
+  for (const f of ANIMAL_ADVENTURE.fields.filter(x => x.kind === 'task')) {
+    assert(f.easy && f.hard && f.answer, `pole ${f.n} jest niekompletne`);
+    assert(f.easy.length <= 24, `pole ${f.n}: za długie łatwe polecenie`);
+    assert(f.hard.length <= 36, `pole ${f.n}: za długie polecenie ★`);
+  }
+});
+
+check('pola planszy mieszczą się na A2 i omijają łączenia', () => {
+  const { width, height } = ANIMAL_ADVENTURE.size;
+  for (const f of ANIMAL_ADVENTURE.fields) {
+    assert(f.x >= 20 && f.x <= width - 20, `pole ${f.n}: x=${f.x} przy krawędzi`);
+    assert(f.y >= 20 && f.y <= height - 20, `pole ${f.n}: y=${f.y} przy krawędzi`);
+    assert(Math.abs(f.x - width / 2) >= 18, `pole ${f.n} wpada na pionowe łączenie`);
+    assert(Math.abs(f.y - height / 2) >= 18, `pole ${f.n} wpada na poziome łączenie`);
+  }
+});
+
+check('każda ikona Animal Adventure istnieje w OpenMoji', () => {
+  const missing = [];
+  for (const f of ANIMAL_ADVENTURE.fields) {
+    for (const emoji of f.icons || [f.icon]) if (emoji && !OM_MAP[emoji]) missing.push(`${f.n}:${emoji}`);
+  }
+  assert(!missing.length, 'brak ikon: ' + missing.join(', '));
 });
 
 check('filtry zawężają listę i szukanie działa', () => {

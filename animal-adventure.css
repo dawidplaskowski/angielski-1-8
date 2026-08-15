@@ -1,0 +1,268 @@
+:root {
+  --ink: #173b33;
+  --green: #24745b;
+  --sun: #ffd84d;
+  --coral: #ff735d;
+  --blue: #2f91c4;
+  --paper: #fffdf7;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: #e7eee9;
+  font-family: 'Andika', system-ui, sans-serif;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  min-height: 72px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: rgba(255,255,255,.96);
+  border-bottom: 1px solid #cad8d0;
+  box-shadow: 0 3px 18px rgba(22,57,48,.1);
+}
+
+.back { color: var(--green); text-decoration: none; font-weight: 700; white-space: nowrap; }
+.toolbar-title { display: flex; flex-direction: column; line-height: 1.25; }
+.toolbar-title strong { font-size: 18px; }
+.toolbar-title span { color: #65756e; font-size: 12px; }
+.toolbar-actions { margin-left: auto; display: flex; gap: 8px; }
+button {
+  border: 1px solid #b9cec3;
+  border-radius: 9px;
+  padding: 9px 13px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+button.primary { border-color: var(--green); background: var(--green); color: white; }
+
+main { padding: 24px; }
+.screen-note {
+  max-width: 210mm;
+  margin: 0 auto 18px;
+  padding: 12px 15px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(22,57,48,.08);
+  font-size: 13px;
+}
+
+#pages { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.print-page {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  overflow: hidden;
+  flex: none;
+  background: var(--paper);
+  box-shadow: 0 7px 30px rgba(23,59,51,.18);
+}
+
+/* Każda kartka pokazuje wycinek tego samego świata 420 × 594 mm. */
+.board-world {
+  position: absolute;
+  inset: 0;
+  width: 210mm;
+  height: 297mm;
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04), rgba(255,255,255,.04)),
+    url('assets/animal-adventure-bg-print.jpg');
+  background-size: 420mm 630mm;
+  background-repeat: no-repeat;
+}
+.board-page[data-col="0"] .board-world { background-position-x: 0; }
+.board-page[data-col="1"] .board-world { background-position-x: -210mm; }
+.board-page[data-row="0"] .board-world { background-position-y: -18mm; }
+.board-page[data-row="1"] .board-world { background-position-y: -315mm; }
+
+.route {
+  position: absolute;
+  inset: 0;
+  width: 210mm;
+  height: 297mm;
+  z-index: 1;
+  overflow: visible;
+}
+.route-shadow { fill: none; stroke: rgba(75,43,17,.52); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+.route-main { fill: none; stroke: #ffe276; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2 4; }
+
+.field {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, -50%) rotate(var(--tilt, 0deg));
+  width: 38mm;
+  min-height: 31mm;
+  padding: 2.2mm 2mm 1.8mm;
+  display: grid;
+  grid-template-columns: 9mm 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 1.6mm;
+  align-items: center;
+  border: 1.1mm solid #fff;
+  border-radius: 6mm;
+  background: rgba(255,253,245,.94);
+  box-shadow: 0 1.5mm 0 rgba(68,40,18,.3), 0 2mm 5mm rgba(34,30,18,.18);
+  color: #173b33;
+}
+.field:nth-of-type(3n) { --tilt: -1.5deg; }
+.field:nth-of-type(3n + 1) { --tilt: 1.5deg; }
+.field.task { border-color: rgba(255,255,255,.96); }
+.field.special.good { background: rgba(224,255,232,.95); border-color: #63c57c; }
+.field.special.bad { background: rgba(255,232,211,.96); border-color: #e98d50; }
+.field.start, .field.finish {
+  background: linear-gradient(145deg, #fff5a7, #ffd94d);
+  border-color: white;
+  box-shadow: 0 1.5mm 0 #cc8731, 0 2mm 5mm rgba(34,30,18,.2);
+}
+.field.finish { background: linear-gradient(145deg, #ffd1e7, #ff7aa7); }
+.field-number {
+  position: absolute;
+  top: -2.5mm;
+  left: -2.5mm;
+  width: 8mm;
+  height: 8mm;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--green);
+  border: .8mm solid white;
+  color: white;
+  font-size: 8pt;
+  font-weight: 800;
+  line-height: 1;
+}
+.field-icon, .field-icons { grid-row: 1 / 3; width: 9mm; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; }
+.field-icon svg { width: 9mm; height: 9mm; }
+.field-icons svg { width: 5mm; height: 5mm; margin: -.4mm; }
+.field-easy { align-self: end; font-size: 7.7pt; line-height: 1.12; font-weight: 800; }
+.field-hard { align-self: start; margin-top: .7mm; font-size: 6.25pt; line-height: 1.08; color: #4c625b; }
+.field-hard::before { content: '★ '; color: #e29100; }
+.field.special .field-easy, .field.start .field-easy, .field.finish .field-easy { font-size: 7pt; letter-spacing: .02em; }
+
+.world-title {
+  position: absolute;
+  left: 155mm;
+  top: 282mm;
+  z-index: 4;
+  width: 86mm;
+  min-height: 18mm;
+  transform: translate(-50%, -50%) rotate(-2deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1.5mm solid white;
+  border-radius: 8mm;
+  background: linear-gradient(135deg, rgba(30,116,87,.97), rgba(26,82,118,.97));
+  box-shadow: 0 2mm 0 rgba(40,53,31,.35), 0 3mm 8mm rgba(23,44,34,.25);
+  color: white;
+  text-align: center;
+}
+.world-title strong { font-size: 13pt; line-height: 1; letter-spacing: .04em; }
+.world-title span { margin-top: .7mm; font-size: 5.5pt; letter-spacing: .1em; text-transform: uppercase; }
+
+.sheet-code {
+  position: absolute;
+  z-index: 10;
+  left: 5mm;
+  top: 5mm;
+  width: 10mm;
+  height: 10mm;
+  display: grid;
+  place-items: center;
+  border: .7mm solid white;
+  border-radius: 50%;
+  background: rgba(23,59,51,.9);
+  color: white;
+  font-weight: 800;
+  font-size: 10pt;
+}
+.seam-note {
+  position: absolute;
+  z-index: 9;
+  right: 4mm;
+  bottom: 3mm;
+  padding: 1mm 2mm;
+  border-radius: 2mm;
+  background: rgba(255,255,255,.85);
+  color: #31564b;
+  font-size: 6pt;
+}
+
+/* Kartki informacyjne */
+.info-page { padding: 13mm 14mm 11mm; }
+.info-page::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 8mm;
+  background: linear-gradient(90deg, #54b875, #ffd84d, #ff7a64, #39a6d8);
+}
+.info-page h1 { margin: 2mm 0 1mm; font-size: 24pt; color: #1f7358; }
+.info-page .subtitle { margin: 0 0 6mm; color: #687871; font-size: 10pt; }
+.facts { display: grid; grid-template-columns: repeat(4,1fr); gap: 3mm; margin-bottom: 5mm; }
+.fact { padding: 3mm; border-radius: 3mm; background: #edf7f1; }
+.fact b { display: block; color: #1f7358; font-size: 7pt; text-transform: uppercase; letter-spacing: .08em; }
+.fact span { font-weight: 800; font-size: 9pt; }
+.info-page h2 { margin: 5mm 0 1.5mm; font-size: 14pt; color: #1f7358; }
+.info-page ol, .info-page ul { margin: 0; padding-left: 6mm; font-size: 9.3pt; line-height: 1.45; }
+.info-page li { margin-bottom: 1.2mm; }
+.tip { margin-top: 4mm; padding: 3mm 4mm; border-left: 1.3mm solid #f1b82f; border-radius: 2mm; background: #fff8d9; font-size: 8.7pt; }
+.answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5mm 5mm; margin-top: 4mm; }
+.answer-row { display: grid; grid-template-columns: 8mm 1fr; align-items: start; min-height: 15mm; padding: 2mm; border-radius: 2mm; background: #f1f6f3; font-size: 7.7pt; line-height: 1.22; }
+.answer-n { width: 6mm; height: 6mm; display: grid; place-items: center; border-radius: 50%; background: #28765d; color: white; font-weight: 800; }
+.answer-row b { display: block; color: #496259; font-size: 6.7pt; }
+.phrase-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3mm; }
+.phrase { padding: 3mm 4mm; border-radius: 3mm; background: #edf7f1; border: .5mm solid #c7e6d2; }
+.phrase strong { display: block; font-size: 11pt; color: #1f7358; }
+.phrase span { font-size: 8pt; color: #5a6c65; }
+.legend-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 3mm; }
+.legend { padding: 3mm; border-radius: 3mm; font-size: 8pt; background: #f2f6f4; }
+.legend strong { display: block; margin-bottom: 1mm; font-size: 9pt; }
+.assembly { display: grid; grid-template-columns: 48mm 1fr; gap: 5mm; align-items: center; }
+.assembly-map { display: grid; grid-template-columns: 1fr 1fr; border: .7mm solid #31564b; }
+.assembly-map div { aspect-ratio: 210/297; display: grid; place-items: center; border: .3mm solid #31564b; font-size: 18pt; font-weight: 800; background: #e6f4eb; }
+.credits { position: absolute; left: 14mm; right: 14mm; bottom: 9mm; color: #718079; font-size: 6.7pt; }
+
+@media (max-width: 850px) {
+  .toolbar { align-items: flex-start; flex-wrap: wrap; }
+  .toolbar-actions { width: 100%; margin-left: 0; }
+  main { padding: 12px 0; overflow-x: auto; }
+  .screen-note { margin-left: 12px; margin-right: 12px; }
+}
+
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { margin: 0; background: white; }
+  .no-print { display: none !important; }
+  main { padding: 0; }
+  #pages { display: block; gap: 0; }
+  .print-page {
+    margin: 0;
+    height: 293mm;
+    box-shadow: none;
+    break-after: auto;
+    page-break-after: auto;
+    break-before: auto;
+    page-break-before: auto;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  /* Chrome rezerwuje ok. 4 mm wysokości mimo @page margin:0. Ściskamy wyłącznie
+     warstwę planszy o 1,35%, zamiast pozwolić przeglądarce dodać pustą 8. stronę. */
+  .board-page .board-world { transform: scaleY(.986532); transform-origin: top; }
+  body.board-only .info-page { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
