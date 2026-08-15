@@ -334,23 +334,146 @@ check('pola specjalne używają ikon OpenMoji i czterech kolorów', () => {
   }
 });
 
-check('każda plansza ma własne talie dla klas 1–3', () => {
+check('każda z 8 plansz ma dokładnie jedną talię dla klas 1–3', () => {
+  const boardIds = new Set(BOARD_THEMES.map(board => board.id));
+  const packIds = TASK_PACKS.map(pack => pack.id);
+  assert(BOARD_THEMES.length === 8, `oczekiwano 8 plansz, jest ${BOARD_THEMES.length}`);
+  assert(TASK_PACKS.length === 24, `oczekiwano 8 × 3 = 24 talie, jest ${TASK_PACKS.length}`);
+  assert(new Set(packIds).size === packIds.length, 'powtórzone id talii planszowej');
+
   for (const board of BOARD_THEMES) for (const grade of ['1','2','3']) {
-    const found = TASK_PACKS.filter(p => p.theme === board.id && p.grade === grade);
-    assert(found.length === 1, `${board.id}/kl.${grade}: ${found.length} talii`);
+    const found = TASK_PACKS.filter(pack => pack.theme === board.id && pack.grade === grade);
+    assert(found.length === 1, `${board.id}/kl.${grade}: znaleziono ${found.length} talii zamiast jednej`);
   }
-  assert(TASK_PACKS.length === BOARD_THEMES.length * 3, `oczekiwano ${BOARD_THEMES.length * 3} talii, jest ${TASK_PACKS.length}`);
+
+  for (const pack of TASK_PACKS) {
+    assert(boardIds.has(pack.theme), `${pack.id}: nieznany motyw "${pack.theme}"`);
+    assert(['1','2','3'].includes(pack.grade), `${pack.id}: nieprawidłowa klasa "${pack.grade}"`);
+    assert(pack.id === `${pack.theme}-${pack.grade}`,
+      `${pack.id}: id nie zgadza się z motywem ${pack.theme} i klasą ${pack.grade}`);
+    assert(typeof pack.title === 'string' && pack.title.trim(), `${pack.id}: brak tytułu`);
+  }
 });
 
-check('każda talia planszowa ma 32 różnorodne zadania', () => {
+check('talie planszowe mają po 32 kompletne, kolejno ponumerowane zadania', () => {
+  const normalized = text => String(text).normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('pl');
   for (const pack of TASK_PACKS) {
-    assert(pack.tasks.length === 32, `${pack.id}: ${pack.tasks.length} zadań`);
-    assert(new Set(pack.tasks.map(t => t.prompt)).size === 32, `${pack.id}: powtórzone polecenia`);
-    assert(new Set(pack.tasks.map(t => t.type)).size >= 5, `${pack.id}: za mało typów aktywności`);
-    pack.tasks.forEach((t, i) => {
-      assert(t.n === i + 1, `${pack.id}: zły numer ${t.n}`);
-      assert(t.prompt && t.answer && t.type, `${pack.id}/${t.n}: brak danych`);
+    assert(Array.isArray(pack.tasks), `${pack.id}: tasks nie jest tablicą`);
+    assert(pack.tasks.length === 32, `${pack.id}: ${pack.tasks.length} zadań zamiast 32`);
+    const prompts = pack.tasks.map(task => normalized(task.prompt));
+    assert(new Set(prompts).size === 32, `${pack.id}: powtórzone polecenia po normalizacji zapisu`);
+
+    pack.tasks.forEach((task, index) => {
+      assert(task.n === index + 1, `${pack.id}: pozycja ${index + 1} ma numer ${task.n}`);
+      assert(typeof task.type === 'string' && task.type.trim(), `${pack.id}/${task.n}: brak typu`);
+      assert(typeof task.prompt === 'string' && task.prompt.trim(), `${pack.id}/${task.n}: brak polecenia`);
+      assert(typeof task.answer === 'string' && task.answer.trim(), `${pack.id}/${task.n}: brak odpowiedzi`);
     });
+  }
+});
+
+check('polecenia i odpowiedzi mieszczą się na kartach i nie są placeholderami', () => {
+  // Limity są celowo z zapasem względem obecnego składu 3 × 3 na A4. Mają
+  // zatrzymać wklejony akapit, nie karać za pojedyncze dłuższe polecenie.
+  const unresolvedAnswer = /^(?:[-—…?]+|brak|n\/?a|tbd)$|\b(?:zale[zż]y od|zale[zż]nie od|do ustalenia)\b/i;
+  const issues = [];
+  for (const pack of TASK_PACKS) for (const task of pack.tasks) {
+    const promptLength = Array.from(task.prompt.trim()).length;
+    const answerLength = Array.from(task.answer.trim()).length;
+    if (promptLength > 100) issues.push(`${pack.id}/${task.n}: polecenie ${promptLength}/100 znaków`);
+    if (answerLength > 70) issues.push(`${pack.id}/${task.n}: odpowiedź ${answerLength}/70 znaków`);
+    if (unresolvedAnswer.test(task.answer.trim()))
+      issues.push(`${pack.id}/${task.n}: nierozstrzygalna odpowiedź "${task.answer}"`);
+  }
+  assert(!issues.length, issues.slice(0, 8).join('; '));
+});
+
+check('zadania klas 1–3 nie wymagają zaawansowanej gramatyki ani minutowych wypowiedzi', () => {
+  const beyondEarlyPrimary = /\b(?:past simple|future simple|present perfect|first conditional|mammals?|herbivores?|carnivores?)\b|czasie przeszłym|przez minutę|minuta mówienia/i;
+  for (const pack of TASK_PACKS) for (const task of pack.tasks) {
+    const assessedText = `${task.prompt} ${task.answer}`;
+    assert(!beyondEarlyPrimary.test(assessedText),
+      `${pack.id}/${task.n}: treść wykracza poza realny poziom klasy ${pack.grade}`);
+  }
+});
+
+check('każda talia ma rozsądny rozkład typów i nie powtarza jednego schematu', () => {
+  const allowedTypes = new Set([
+    'recognition','movement','listening','counting','classification',
+    'production','dialogue','translation','reasoning',
+  ]);
+  const minimumTypeCount = {'1':6, '2':7, '3':5};
+  const requiredByGrade = {
+    '1':['recognition','movement','listening','production'],
+    '2':['production','classification','reasoning','dialogue'],
+    '3':['production','classification','reasoning','dialogue','translation'],
+  };
+
+  for (const pack of TASK_PACKS) {
+    const counts = {};
+    const openingWords = {};
+    let longestRun = 1, currentRun = 1;
+    pack.tasks.forEach((task, index) => {
+      assert(allowedTypes.has(task.type), `${pack.id}/${task.n}: nieznany typ "${task.type}"`);
+      counts[task.type] = (counts[task.type] || 0) + 1;
+      const firstWord = task.prompt.normalize('NFKC').trim().toLocaleLowerCase('pl').split(/[\s:,.!?—–-]/)[0];
+      openingWords[firstWord] = (openingWords[firstWord] || 0) + 1;
+      if (index) {
+        currentRun = task.type === pack.tasks[index - 1].type ? currentRun + 1 : 1;
+        longestRun = Math.max(longestRun, currentRun);
+      }
+    });
+
+    const usedTypes = Object.keys(counts);
+    assert(usedTypes.length >= minimumTypeCount[pack.grade],
+      `${pack.id}: tylko ${usedTypes.length} różnych typów aktywności`);
+    requiredByGrade[pack.grade].forEach(type =>
+      assert(counts[type], `${pack.id}: brak ważnego dla klasy ${pack.grade} typu "${type}"`));
+    const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    assert(dominant[1] <= 10, `${pack.id}: typ "${dominant[0]}" powtarza się aż ${dominant[1]} razy`);
+    assert(longestRun <= 2, `${pack.id}: ${longestRun} kolejnych zadań tego samego typu`);
+    const repeatedOpening = Object.entries(openingWords).sort((a, b) => b[1] - a[1])[0];
+    assert(repeatedOpening[1] <= 6,
+      `${pack.id}: ${repeatedOpening[1]} poleceń zaczyna się tak samo ("${repeatedOpening[0]}")`);
+  }
+});
+
+check('zadania odwołujące się do ilustracji nie mieszają motywów plansz', () => {
+  // Tylko charakterystyczne słowa. Wspólne elementy (np. tree, bridge, star) są
+  // celowo pominięte, a jawne kontrasty typu „cat czy rocket?” są dozwolone.
+  const markers = {
+    animal: ['cat','dog','cow','horse','elephant','rabbit','lion','tiger','frog','duck','hamster','giraffe','zebra','penguin','whale','dolphin','snake','snail','turtle','kangaroo','bear','goat','fox','hedgehog',
+      'kot','kota','pies','psa','krowa','kon','slon','krolik','lew','tygrys','zaba','kaczka','chomik','zyrafa','wieloryb','delfin','waz','slimak','zolw','kangur','niedzwiedz','koza','lis','jez'],
+    space: ['rocket','astronaut','alien','satellite','spaceship','planet','moon','earth','mars','venus','comet',
+      'rakieta','rakiete','astronauta','astronaute','kosmita','satelita','satelite','planeta','planete','ksiezyc','ziemia','mars','wenus','kometa'],
+    pirate: ['pirate','treasure','parrot','palm tree','compass','shell','chest','island','beach',
+      'pirat','skarb','papuga','palma','kompas','muszla','skrzynia','wyspa','plaza'],
+    city: ['bus','tram','bicycle','fountain','street','shop','museum','bench','clock',
+      'autobus','tramwaj','rower','fontanna','ulica','sklep','muzeum','lawka','zegar'],
+    magic: ['castle','dragon','potion','greenhouse','telescope','lantern','wizard','spell',
+      'zamek','smok','eliksir','szklarnia','teleskop','latarnia','czarodziej','zaklecie'],
+    dinosaur: ['dinosaur','triceratops','stegosaurus','brachiosaurus','fossil','footprint','volcano','dragonfly','fern',
+      'dinozaur','skamielina','slad','wulkan','wazka','paproc'],
+    food: ['apple','banana','strawberry','tomato','carrot','bread','cupcake','soup','sandwich','juice','salad',
+      'jablko','banan','truskawka','pomidor','marchewka','chleb','babeczka','zupa','kanapka','sok','salatka'],
+    seasons: ['winter','spring','summer','autumn','snowman','snow','butterfly','pumpkin','rain',
+      'zima','wiosna','lato','jesien','balwan','snieg','motyl','dynia','deszcz'],
+  };
+  const normalizeWords = text => ` ${String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('pl').replace(/[^a-z0-9]+/g, ' ').trim()} `;
+  const containsMarker = (text, marker) => text.includes(` ${normalizeWords(marker).trim()} `);
+  const refersToBoard = /(na plansz|na ilustracj|obrazk|wskaz|dotkn|znajdz|widzi|point to|touch|pokaz ruchem|udawaj|poruszaj|odegraj)/;
+  const explicitContrast = /(odd one out|nie pasuj|z innego tematu|\bczy\b|\bor\b)/;
+
+  for (const pack of TASK_PACKS) for (const task of pack.tasks) {
+    const prompt = normalizeWords(task.prompt);
+    if (!refersToBoard.test(prompt) || explicitContrast.test(prompt)) continue;
+    const searchable = normalizeWords(`${task.prompt} ${task.answer}`);
+    for (const [theme, words] of Object.entries(markers)) {
+      if (theme === pack.theme) continue;
+      const foreign = words.find(word => containsMarker(searchable, word));
+      assert(!foreign, `${pack.id}/${task.n}: odwołanie do obcego motywu "${foreign}" w zadaniu o ilustracji`);
+    }
   }
 });
 
